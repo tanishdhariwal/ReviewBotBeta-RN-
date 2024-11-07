@@ -3,9 +3,9 @@
 ## Get started
 
 Clone and run this command
-''' bash
+
+
 npx expo start
-'''
 
 download the my expo app on mobile
 
