@@ -25,7 +25,7 @@ const onSignIn=()=>{
         ToastAndroid.show("Please enter all details",ToastAndroid.CENTER)
     }
 signInWithEmailAndPassword(auth, email, password)
-router.replace('/myTrip')
+router.replace('/(tabs)/chatbot')
   .then((userCredential) => {
     // Signed in 
     const user = userCredential.user;
@@ -113,7 +113,7 @@ router.replace('/myTrip')
             }}>Sign In</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-        onPress={()=>router.replace('auth/Sign-up')}
+        onPress={()=>router.replace('/auth/Sign-up')}
         style = {{
             marginTop:'10%',
             padding:'5%',
