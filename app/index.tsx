@@ -5,7 +5,7 @@ import { Redirect } from "expo-router";
 export default function Index() {
 
   return (
-    <View
+    <View 
       style={{
         flex: 1
 
