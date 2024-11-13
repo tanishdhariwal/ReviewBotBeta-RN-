@@ -15,7 +15,7 @@ export default function Login(){
         />
         <View style={styles.container}>
             <Text style={{
-                fontSize:20,
+                fontSize:30,
                 fontFamily:"outfit-Bold",
                 textAlign:'center',
                 color:Colors.BLACK
@@ -61,4 +61,3 @@ const styles = StyleSheet.create({
 
     }
 })
-

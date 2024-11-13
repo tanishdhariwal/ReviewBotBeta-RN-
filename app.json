@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "AI_TripPlanner",
-    "slug": "AI_TripPlanner",
+    "name": "ReviewBot",
+    "slug": "ReviewBot",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

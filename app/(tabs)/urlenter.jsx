@@ -11,13 +11,15 @@ export default function UrlEnter() {
   const [url, setUrl] = useState('');
   const [inputFocused, setInputFocused] = useState(false);
   const inputAnimation = React.useRef(new Animated.Value(0)).current;
-
+  
+  const navigation = useNavigation();
+  const router = useRouter();
   const handleSend = () => {
+    
+    router.push('/chatbot');
     console.log('Sending URL:', url);
     setUrl('');
   };
-  const navigation = useNavigation();
-  const router = useRouter();
 
   const inputScale = inputAnimation.interpolate({
     inputRange: [0, 1],

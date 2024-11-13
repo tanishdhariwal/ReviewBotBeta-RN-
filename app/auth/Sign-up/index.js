@@ -1,142 +1,192 @@
-import { Text, TextInput, View, StyleSheet, ToastAndroid } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useNavigation, useRouter } from 'expo-router'
-import {Colors} from './../../../constants/Colors'
-import { TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Text, TextInput, View, StyleSheet, TouchableOpacity, Dimensions, Animated } from 'react-native';
+import { useNavigation, useRouter } from 'expo-router';
+import { Colors } from './../../../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import {auth} from './../../../configs/Firebase_Config'
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from './../../../configs/Firebase_Config';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+
+const { width, height } = Dimensions.get('window');
 
 export default function SignUp() {
   const navigation = useNavigation();
   const router = useRouter();
 
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [nameFocused, setNameFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
-  useEffect(()=>{
-     navigation.setOptions({
-      headerShown:false
-     })
-  },[])
-  const [email,setEmail] = useState();
-  const [password,setPassword] = useState();
-  const [Name,setName] = useState();
+  const nameAnimation = useRef(new Animated.Value(0)).current;
+  const emailAnimation = useRef(new Animated.Value(0)).current;
+  const passwordAnimation = useRef(new Animated.Value(0)).current;
 
-const onCreateAccount=()=>{
+  useEffect(() => {
+    navigation.setOptions({ headerShown: false });
+  }, []);
 
-    if(!email||!password||!Name)
-    {
-        ToastAndroid.show("Please enter all details",ToastAndroid.CENTER);
-        return;
+
+  const onCreateAccount = () => {
+    if (!name || !email || !password) {
+      alert("Please enter all details");
+      return;
     }
-createUserWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed up 
-    const user = userCredential.user;
-    console.log(user);
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log(errorMessage,errorCode);
-    // ..
-  });
-  }
 
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log(user);
+        router.replace('/(tabs)/urlenter');
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorMessage, errorCode);
+        alert(errorMessage);
+      });
+  };
 
   return (
-    <View
-    style={{
-      backgroundColor:Colors.CREAM,
-      padding:'5%',
-      paddingTop:'15%',
-      height:'100%',
-      alignContent:'center'
-      
-    }}>
-       <TouchableOpacity 
-        onPress={()=>router.back()}> 
-        <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-      <Text
-      style={{
-        fontFamily:'outfit-Bold',
-        fontSize:30,
-        marginTop:'15%',
-        textAlign:'justify',
-      }}>Create new Account</Text>
+    <LinearGradient
+      colors={['#CE0075', '#0057FB', '#00FFEF']}
+      style={styles.container}
+    >
+      <BlurView intensity={100} style={StyleSheet.absoluteFill} />
 
-<View style={{
-            marginTop:'10%',
-        }}>
-            <Text style={{
-                fontFamily:'outfit-Regular',
-            }}>    Name</Text>
-            <TextInput style={styles.input} placeholder='Enter name'
-            onChangeText={(value=>setName(value))}/>
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={24} color="white" />
+      </TouchableOpacity>
 
-        </View>
+      <View style={styles.content}>
+        <Text style={styles.title}>Create New Account</Text>
+        <Text style={styles.subtitle}>Join our community!</Text>
 
-<View style={{
-            marginTop:'10%',
-        }}>
-            <Text style={{
-                fontFamily:'outfit-Regular',
-            }}>    Email</Text>
-            <TextInput style={styles.input} placeholder='Enter Email'
-            onChangeText={(value=>setEmail(value))}/>
+        <Animated.View style={[styles.inputContainer, { transform: [{ scale: nameAnimation.interpolate({ inputRange: [0, 1], outputRange: [1, 1.05] }) }] }]}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Name"
+            placeholderTextColor="#888"
+            onChangeText={(value) => setName(value)}
+          />
+        </Animated.View>
 
-        </View>
-        <View style={{
-            marginTop:'10%',             
-        }}>
-            <Text style={{
-                fontFamily:'outfit-Regular',
-            }}>    Password</Text>
-            <TextInput
+        <Animated.View style={[styles.inputContainer, { transform: [{ scale: emailAnimation.interpolate({ inputRange: [0, 1], outputRange: [1, 1.05] }) }] }]}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Email"
+            placeholderTextColor="#888"
+            onChangeText={(value) => setEmail(value)}
+          />
+        </Animated.View>
+
+        <Animated.View style={[styles.inputContainer, { transform: [{ scale: passwordAnimation.interpolate({ inputRange: [0, 1], outputRange: [1, 1.05] }) }] }]}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Password"
+            placeholderTextColor="#888"
             secureTextEntry={true}
-             style={styles.input} placeholder='Enter Password'
-             onChangeText={(value=>setPassword(value))}/>
+            onChangeText={(value) => setPassword(value)}
+          />
+        </Animated.View>
 
-        </View>
-        <TouchableOpacity onPress={onCreateAccount} style = {{
-            marginTop:'10%',
-            padding:'5%',
-            backgroundColor:Colors.BLACK,
-            borderRadius:20,
-
-        }}>
-            <Text style = {{
-                color:Colors.WHITE,
-                fontFamily:'outfit-Bold',
-                textAlign:'center', 
-            }}>Create Account</Text>
+        <TouchableOpacity style={styles.signUpButton} onPress={onCreateAccount}>
+          <Text style={styles.buttonText}>Create Account</Text>
         </TouchableOpacity>
+
         <TouchableOpacity 
-        onPress={()=>router.replace('auth/Sign-in')}
-        style = {{
-            marginTop:'10%',
-            padding:'5%',
-            borderWidth:1,
-            borderRadius:20,
-
-        }}>
-            <Text style = {{
-                fontFamily:'outfit-Regular',
-                textAlign:'center', 
-            }}>Sign In</Text>
+          style={styles.signInButton}
+          onPress={() => router.replace('auth/Sign-in')}
+        >
+          <Text style={styles.signInText}>Already have an account? Sign In</Text>
         </TouchableOpacity>
-    </View>
-  )
+      </View>
+    </LinearGradient>
+  );
 }
 
 const styles = StyleSheet.create({
-  input:{
-      padding:10,
-      borderWidth:1,
-      borderRadius:20,
-      borderColor:Colors.GRAY,
-      fontFamily:'outfit-Regular',
-
-  }
-})
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
+  },
+  content: {
+    width: width * 0.8,
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  title: {
+    fontFamily: 'outfit-Bold',
+    fontSize: 32,
+    color: 'white',
+    marginBottom: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
+  },
+  subtitle: {
+    fontFamily: 'outfit-Bold',
+    fontSize: 24,
+    color: 'white',
+    marginBottom: 20,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
+  },
+  inputContainer: {
+    width: '100%',
+    marginTop: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    height: 60,
+    justifyContent: 'center',
+    shadowColor: "#000",
+  },
+  input: {
+    fontFamily: 'outfit-Regular',
+    fontSize: 16,
+    color: 'white',
+  },
+  signUpButton: {
+    marginTop: 30,
+    backgroundColor: 'rgba(0, 122, 255, 0.8)',
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    shadowColor: "#000",
+  },
+  buttonText: {
+    fontFamily: 'outfit-Bold',
+    color: 'white',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  signInButton: {
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: 'black',
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+  },
+  signInText: {
+    fontFamily: 'outfit-Regular',
+    color: 'black',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+});
