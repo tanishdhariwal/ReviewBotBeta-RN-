@@ -26,7 +26,7 @@ export default function UrlEnter() {
 
   return (
     <LinearGradient
-      colors={['#D16BA5', '#86A8E7', '#5FFBF1']}
+    colors={['#CE0075', '#0057FB', '#00FFEF']}
       style={styles.container}
     >
       <BlurView intensity={100} style={StyleSheet.absoluteFill} />
