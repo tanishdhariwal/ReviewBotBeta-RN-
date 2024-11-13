@@ -25,10 +25,12 @@ const onSignIn=()=>{
         ToastAndroid.show("Please enter all details",ToastAndroid.CENTER)
     }
 signInWithEmailAndPassword(auth, email, password)
-router.replace('/(tabs)/chatbot')
+
+
   .then((userCredential) => {
     // Signed in 
     const user = userCredential.user;
+    router.replace('/(tabs)/chatbot')
     console.log(user);
     // ...
   })
