@@ -4,9 +4,9 @@ import { useNavigation, useRouter } from 'expo-router'
 import {Colors} from './../../../constants/Colors'
 import { TouchableOpacity } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {auth} from './../../../configs/Firebase_Config'
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SignIn() {
     const navigation = useNavigation();
@@ -30,7 +30,7 @@ signInWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
     // Signed in 
     const user = userCredential.user;
-    router.replace('/(tabs)/chatbot')
+    router.replace('/(tabs)/urlenter')
     console.log(user);
     // ...
   })
