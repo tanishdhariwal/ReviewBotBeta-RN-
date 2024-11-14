@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useNavigation, useRouter } from 'expo-router';
+import { Menu, MenuItem } from 'react-native-material-menu';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,7 +21,9 @@ export default function UrlEnter() {
   const [url, setUrl] = useState('');
   const [inputFocused, setInputFocused] = useState(false);
   const inputAnimation = React.useRef(new Animated.Value(0)).current;
-  
+  const [menuVisible, setMenuVisible] = useState(false);
+  const username = "User123"; // Replace with actual username logic
+
   const navigation = useNavigation();
   const router = useRouter();
   const handleSend = () => {
@@ -36,6 +39,13 @@ export default function UrlEnter() {
     }
   };
 
+  const showMenu = () => setMenuVisible(true);
+  const hideMenu = () => setMenuVisible(false);
+  const handleLogout = () => {
+    hideMenu();
+    router.replace('/./../auth/Sign-in');
+  };
+
   const inputScale = inputAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [1, 1.05],
@@ -48,9 +58,18 @@ export default function UrlEnter() {
     >
       <BlurView intensity={100} style={StyleSheet.absoluteFill} />
       
-      <TouchableOpacity style={styles.profileButton}>
-        <Ionicons name="person-circle-outline" size={32} color="white" />
-      </TouchableOpacity>
+      <Menu
+        visible={menuVisible}
+        anchor={
+          <TouchableOpacity style={styles.profileButton} onPress={showMenu}>
+            <Ionicons name="person-circle-outline" size={32} color="white" />
+          </TouchableOpacity>
+        }
+        onRequestClose={hideMenu}
+      >
+        <MenuItem disabled>{username}</MenuItem>
+        <MenuItem onPress={handleLogout}>Logout</MenuItem>
+      </Menu>
 
       <Text style={styles.title}>Easy Pick Chatbot</Text>
 
@@ -112,9 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 122, 255, 1)',
   },
   profileButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    zIndex: 10,
+    marginTop: '-70%',
+    marginLeft: '70%',
   },
 });

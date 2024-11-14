@@ -27,7 +27,6 @@ export default function SignIn() {
     navigation.setOptions({ headerShown: false });
   }, []);
 
-
   const onSignIn = () => {
     if (!email || !password) {
       // Use Alert.alert for iOS compatibility
