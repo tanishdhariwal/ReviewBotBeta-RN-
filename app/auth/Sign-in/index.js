@@ -18,6 +18,7 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const emailAnimation = useRef(new Animated.Value(0)).current;
   const passwordAnimation = useRef(new Animated.Value(0)).current;
@@ -83,9 +84,19 @@ export default function SignIn() {
             style={styles.input}
             placeholder="Enter Password"
             placeholderTextColor="#888"
-            secureTextEntry={true}
+            secureTextEntry={!showPassword}
             onChangeText={(value) => setPassword(value)}
           />
+          <TouchableOpacity 
+            style={styles.eyeIcon} 
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Ionicons 
+              name={showPassword ? 'eye-off' : 'eye'} 
+              size={24} 
+              color="white" 
+            />
+          </TouchableOpacity>
         </Animated.View>
 
         <TouchableOpacity style={styles.signInButton} onPress={onSignIn}>
@@ -180,5 +191,12 @@ const styles = StyleSheet.create({
     color: 'text',
     fontSize: 16,
     textAlign: 'center',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 15,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

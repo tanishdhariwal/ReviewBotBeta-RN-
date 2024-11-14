@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Text, TextInput, View, StyleSheet, TouchableOpacity, Dimensions, Animated } from 'react-native';
+import { Text, TextInput, View, StyleSheet, TouchableOpacity, Dimensions, Animated, ToastAndroid } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
 import { Colors } from './../../../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -20,6 +20,7 @@ export default function SignUp() {
   const [nameFocused, setNameFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const nameAnimation = useRef(new Animated.Value(0)).current;
   const emailAnimation = useRef(new Animated.Value(0)).current;
@@ -40,6 +41,7 @@ export default function SignUp() {
       .then((userCredential) => {
         const user = userCredential.user;
         console.log(user);
+        ToastAndroid.show("Account created successfully", ToastAndroid.LONG);
         router.replace('/(tabs)/urlenter');
       })
       .catch((error) => {
@@ -91,9 +93,19 @@ export default function SignUp() {
             style={styles.input}
             placeholder="Enter Password"
             placeholderTextColor="#888"
-            secureTextEntry={true}
+            secureTextEntry={!showPassword}
             onChangeText={(value) => setPassword(value)}
           />
+          <TouchableOpacity 
+            style={styles.eyeIcon} 
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Ionicons 
+              name={showPassword ? 'eye-off' : 'eye'} 
+              size={24} 
+              color="white" 
+            />
+          </TouchableOpacity>
         </Animated.View>
 
         <TouchableOpacity style={styles.signUpButton} onPress={onCreateAccount}>
@@ -188,5 +200,12 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 14,
     textAlign: 'center',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 15,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
