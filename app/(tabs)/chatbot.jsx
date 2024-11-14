@@ -13,7 +13,7 @@ export default function ChatBot() {
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef(null);
 
-  const hardcodedReply = "Thank you for your message. This is a hardcoded reply from EasyPick AI assistant.";
+  const hardcodedReply = "This is a hardcoded message";
 
   const sendMessage = () => {
     if (inputText.trim() === '') return;
