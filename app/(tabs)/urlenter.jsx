@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text, Animated, Dimensions } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Text, Animated, Dimensions, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useNavigation, useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
+
+const validateUrl = (url) => {
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.hostname.includes('amazon.com');
+  } catch (e) {
+    return false;
+  }
+};
 
 export default function UrlEnter() {
   const [url, setUrl] = useState('');
@@ -15,10 +24,16 @@ export default function UrlEnter() {
   const navigation = useNavigation();
   const router = useRouter();
   const handleSend = () => {
-    
-    router.push('/chatbot');
-    console.log('Sending URL:', url);
-    setUrl('');
+    console.log('URL entered:', url);
+    console.log('Validation result:', validateUrl(url));
+
+    if (validateUrl(url)) {
+      router.push('/chatbot');
+      console.log('Sending URL:', url);
+      setUrl('');
+    } else {
+      Alert.alert('Invalid URL', 'Please enter a valid Amazon product URL.');
+    }
   };
 
   const inputScale = inputAnimation.interpolate({
