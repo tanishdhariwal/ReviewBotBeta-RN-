@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, Keyboard } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -67,31 +67,37 @@ export default function ChatBot() {
 
       <Text style={styles.title}>EasyPick Chat</Text>
 
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.aiBubble]}>
-            <Text style={styles.messageText}>{item.text}</Text>
-          </View>
-        )}
-        contentContainerStyle={styles.chatContainer}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-      />
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Type your message..."
-          placeholderTextColor="#888"
+      <KeyboardAvoidingView
+        style={{ flex: 1, width: '100%' }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.aiBubble]}>
+              <Text style={styles.messageText}>{item.text}</Text>
+            </View>
+          )}
+          contentContainerStyle={styles.chatContainer}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          showsVerticalScrollIndicator={false}
         />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <Ionicons name="send" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Type your message..."
+            placeholderTextColor="#888"
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+            <Ionicons name="send" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
@@ -99,34 +105,35 @@ export default function ChatBot() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 40,
+    paddingTop: height * 0.05, // Adjust padding dynamically
   },
   backButton: {
     position: 'absolute',
-    top: 40,
-    left: 20,
+    top: height * 0.05, // Adjust dynamically based on screen height
+    left: width * 0.05, // Adjust dynamically based on screen width
     zIndex: 10,
   },
   title: {
     fontFamily: 'outfit-Bold',
-    fontSize: 24,
+    fontSize: width * 0.06, // Dynamically adjust font size
     color: 'white',
-    marginBottom: 20,
+    textAlign: 'center',
+    marginBottom: height * 0.03,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
   },
   chatContainer: {
-    paddingHorizontal: 10,
-    paddingBottom: 20,
+    flexGrow: 1,
+    width: width * 0.9, // Adjust width based on screen size
+    alignSelf: 'center',
+    paddingVertical: height * 0.02,
   },
   messageBubble: {
     maxWidth: '80%',
-    padding: 10,
-    borderRadius: 20,
-    marginVertical: 5,
+    padding: width * 0.03, // Adjust padding dynamically
+    borderRadius: width * 0.05, // Adjust radius dynamically
+    marginVertical: height * 0.01,
   },
   userBubble: {
     alignSelf: 'flex-end',
@@ -139,29 +146,30 @@ const styles = StyleSheet.create({
   messageText: {
     color: 'white',
     fontFamily: 'outfit-Regular',
+    fontSize: width * 0.04, // Adjust font size dynamically
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingBottom: 20,
-    width: '100%',
+    width: width * 0.9, // Adjust width dynamically
+    alignSelf: 'center',
+    marginBottom: height * 0.02, // Avoid overlap
   },
   input: {
     flex: 1,
-    height: 50,
+    height: height * 0.07, // Adjust height dynamically
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    marginRight: 10,
+    borderRadius: height * 0.035, // Adjust radius dynamically
+    paddingHorizontal: width * 0.05,
     color: 'white',
     fontFamily: 'outfit-Regular',
+    marginRight: width * 0.02,
   },
   sendButton: {
+    width: height * 0.07,
+    height: height * 0.07,
     backgroundColor: 'rgba(0, 122, 255, 0.8)',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    borderRadius: height * 0.035,
     justifyContent: 'center',
     alignItems: 'center',
   },

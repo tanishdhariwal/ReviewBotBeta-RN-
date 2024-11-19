@@ -3,10 +3,10 @@ import { View, TextInput, TouchableOpacity, StyleSheet, Text, Animated, Dimensio
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Menu, MenuItem } from 'react-native-material-menu';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const validateUrl = (url) => {
   try {
@@ -19,20 +19,13 @@ const validateUrl = (url) => {
 
 export default function UrlEnter() {
   const [url, setUrl] = useState('');
-  const [inputFocused, setInputFocused] = useState(false);
-  const inputAnimation = React.useRef(new Animated.Value(0)).current;
   const [menuVisible, setMenuVisible] = useState(false);
   const username = "User123"; // Replace with actual username logic
-
-  const navigation = useNavigation();
   const router = useRouter();
-  const handleSend = () => {
-    console.log('URL entered:', url);
-    console.log('Validation result:', validateUrl(url));
 
+  const handleSend = () => {
     if (validateUrl(url)) {
       router.push('/chatbot');
-      console.log('Sending URL:', url);
       setUrl('');
     } else {
       Alert.alert('Invalid URL', 'Please enter a valid Amazon product URL.');
@@ -46,44 +39,43 @@ export default function UrlEnter() {
     router.replace('/./../auth/Sign-in');
   };
 
-  const inputScale = inputAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.05],
-  });
-
   return (
     <LinearGradient
-    colors={['#CE0075', '#0057FB', '#00FFEF']}
+      colors={['#CE0075', '#0057FB', '#00FFEF']}
       style={styles.container}
     >
       <BlurView intensity={100} style={StyleSheet.absoluteFill} />
-      
-      <Menu
-        visible={menuVisible}
-        anchor={
-          <TouchableOpacity style={styles.profileButton} onPress={showMenu}>
-            <Ionicons name="person-circle-outline" size={32} color="white" />
-          </TouchableOpacity>
-        }
-        onRequestClose={hideMenu}
-      >
-        <MenuItem disabled>{username}</MenuItem>
-        <MenuItem onPress={handleLogout}>Logout</MenuItem>
-      </Menu>
+
+      <View style={styles.profileMenuContainer}>
+        <Menu
+          visible={menuVisible}
+          anchor={
+            <TouchableOpacity style={styles.profileButton} onPress={showMenu}>
+              <Ionicons name="person-circle-outline" size={45} color="white" />
+            </TouchableOpacity>
+          }
+          onRequestClose={hideMenu}
+          style={styles.menu}
+        >
+          <MenuItem disabled style={styles.menuItem}>{username}</MenuItem>
+          <MenuItem onPress={handleLogout} style={styles.menuItem}>
+            Logout
+          </MenuItem>
+        </Menu>
+      </View>
 
       <Text style={styles.title}>Easy Pick Chatbot</Text>
 
-      <Animated.View style={[styles.inputContainer, { transform: [{ scale: inputScale }] }]}>
+      <Animated.View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           value={url}
           onChangeText={setUrl}
           placeholder="Enter Amazon product URL"
           placeholderTextColor="#888"
-
         />
         <TouchableOpacity 
-          style={[styles.sendButton, inputFocused && styles.sendButtonActive]} 
+          style={styles.sendButton} 
           onPress={handleSend}
         >
           <Ionicons name="send" size={20} color="white" />
@@ -99,11 +91,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  profileMenuContainer: {
+    position: 'absolute',
+    top: 60, // Adjust to place menu below icon
+    right: 20,
+  },
+  menu: {
+    marginTop: 50, // Ensures dropdown is below the icon
+    backgroundColor: 'white', // Menu color remains white
+    borderRadius: 8,
+    elevation: 5, // Adds subtle shadow for better visibility
+  },
+  menuItem: {
+    color: 'black', // Text color for items
+    fontSize: 16,
+    padding: 10,
+  },
+  profileButton: {
+    alignSelf: 'flex-end',
+  },
   title: {
     fontSize: 32,
-    color: 'black',
+    color: 'white',
     marginBottom: 40,
-    fontFamily:'outfit-Bold',
+    fontFamily: 'outfit-Bold',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -126,12 +137,5 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 10,
     marginLeft: 10,
-  },
-  sendButtonActive: {
-    backgroundColor: 'rgba(0, 122, 255, 1)',
-  },
-  profileButton: {
-    marginTop: '-70%',
-    marginLeft: '70%',
   },
 });
