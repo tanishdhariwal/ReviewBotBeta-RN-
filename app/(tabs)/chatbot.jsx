@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+
 const { width, height } = Dimensions.get('window');
 
 export default function ChatBot() {
@@ -50,6 +51,7 @@ export default function ChatBot() {
       keyboardDidShowListener.remove();
     };
   }, []);
+  
 
   return (
     <LinearGradient

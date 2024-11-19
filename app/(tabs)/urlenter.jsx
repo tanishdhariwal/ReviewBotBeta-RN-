@@ -5,16 +5,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useNavigation, useRouter } from 'expo-router';
 import { Menu, MenuItem } from 'react-native-material-menu';
-
+import {auth} from './../../configs/Firebase_Config';
 const { width, height } = Dimensions.get('window');
-
+const userrr = auth.currentUser;
 const validateUrl = (url) => {
   try {
     const parsedUrl = new URL(url);
-    return parsedUrl.hostname.includes('amazon.com');
+    return parsedUrl.hostname.includes('a');
   } catch (e) {
     return false;
   }
+  console.log(userrr);
 };
 
 export default function UrlEnter() {
@@ -22,7 +23,6 @@ export default function UrlEnter() {
   const [inputFocused, setInputFocused] = useState(false);
   const inputAnimation = React.useRef(new Animated.Value(0)).current;
   const [menuVisible, setMenuVisible] = useState(false);
-  const username = "User123"; // Replace with actual username logic
 
   const navigation = useNavigation();
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function UrlEnter() {
     inputRange: [0, 1],
     outputRange: [1, 1.05],
   });
-
+  
   return (
     <LinearGradient
     colors={['#CE0075', '#0057FB', '#00FFEF']}
@@ -67,7 +67,7 @@ export default function UrlEnter() {
         }
         onRequestClose={hideMenu}
       >
-        <MenuItem disabled>{username}</MenuItem>
+        <MenuItem disabled>{userrr}</MenuItem>
         <MenuItem onPress={handleLogout}>Logout</MenuItem>
       </Menu>
 
