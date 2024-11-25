@@ -16,8 +16,6 @@ export default function SignIn() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const emailAnimation = useRef(new Animated.Value(0)).current;
@@ -29,7 +27,6 @@ export default function SignIn() {
 
   const onSignIn = () => {
     if (!email || !password) {
-      // Use Alert.alert for iOS compatibility
       alert("Please enter all details");
       return;
     }
@@ -167,9 +164,11 @@ const styles = StyleSheet.create({
     marginTop: 30,
     backgroundColor: 'rgba(0, 122, 255, 0.8)',
     borderRadius: 25,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+    paddingVertical: 15,  // Adjusted padding to match the New User button's size
+    paddingHorizontal: 30,  // Adjusted padding to match the New User button's size
     shadowColor: "#000",
+    width: '70%',  // Ensures the width matches the New User button
+    alignItems: 'center',
   },
   buttonText: {
     fontFamily: 'outfit-Bold',
@@ -184,6 +183,8 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingVertical: 15,
     paddingHorizontal: 30,
+    width: '70%',  // Same width for consistency
+    alignItems: 'center',
   },
   createAccountText: {
     fontFamily: 'outfit-Regular',
