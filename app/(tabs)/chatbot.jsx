@@ -62,7 +62,7 @@ export default function ChatBot() {
 
       <TouchableOpacity 
         style={styles.backButton}
-        onPress={() => router.back()}
+        onPress={() => router.replace('/ProductAnalysis')}
       >
         <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
@@ -156,6 +156,12 @@ const styles = StyleSheet.create({
     width: width * 0.9, // Adjust width dynamically
     alignSelf: 'center',
     marginBottom: height * 0.02, // Avoid overlap
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
   },
   input: {
     flex: 1,

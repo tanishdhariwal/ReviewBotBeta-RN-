@@ -25,7 +25,7 @@ export default function UrlEnter() {
 
   const handleSend = () => {
     if (validateUrl(url)) {
-      router.push('/chatbot');
+      router.push('/ProductAnalysis');
       setUrl('');
     } else {
       Alert.alert('Invalid URL', 'Please enter a valid Amazon product URL.');
