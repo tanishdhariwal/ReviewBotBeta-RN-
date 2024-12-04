@@ -49,7 +49,7 @@ export default function SignIn() {
 
   return (
     <LinearGradient
-      colors={['#CE0075', '#0057FB', '#00FFEF']}
+      colors={['#FDF1E6', '#FAD6A5', '#F4A997']}
       style={styles.container}
     >
       <BlurView intensity={100} style={StyleSheet.absoluteFill} />
@@ -58,7 +58,7 @@ export default function SignIn() {
         style={styles.backButton}
         onPress={() => router.back()}
       >
-        <Ionicons name="arrow-back" size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
       <View style={styles.content}>
@@ -130,9 +130,8 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: 'outfit-Bold',
     fontSize: 32,
-    color: 'white',
+    color: 'black',
     marginBottom: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
   },
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
   input: {
     fontFamily: 'outfit-Regular',
     fontSize: 16,
-    color: 'white',
+    color: 'black',
   },
   signInButton: {
     marginTop: 30,

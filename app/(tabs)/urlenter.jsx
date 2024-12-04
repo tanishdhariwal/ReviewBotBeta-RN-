@@ -41,7 +41,7 @@ export default function UrlEnter() {
   
   return (
     <LinearGradient
-      colors={['#CE0075', '#0057FB', '#00FFEF']}
+      colors={['#FDF1E6', '#FAD6A5', '#F4A997']}
       style={styles.container}
     >
       <BlurView intensity={100} style={StyleSheet.absoluteFill} />
@@ -64,7 +64,7 @@ export default function UrlEnter() {
         </Menu>
       </View>
 
-      <Text style={styles.title}>Easy Pick Chatbot</Text>
+      <Text style={styles.title}>Summarize Reviews</Text>
 
       <Animated.View style={styles.inputContainer}>
         <TextInput
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   menu: {
     marginTop: 50, // Ensures dropdown is below the icon
-    backgroundColor: 'white', // Menu color remains white
+    backgroundColor: 'black', // Menu color remains white
     borderRadius: 8,
     elevation: 5, // Adds subtle shadow for better visibility
   },
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    color: 'white',
+    color: 'black',
     marginBottom: 40,
     fontFamily: 'outfit-Bold',
   },
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     fontSize: 16,
-    color: 'white',
+    color: 'black',
   },
   sendButton: {
     backgroundColor: 'rgba(0, 122, 255, 0.8)',

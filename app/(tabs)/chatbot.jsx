@@ -14,7 +14,7 @@ export default function ChatBot() {
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef(null);
 
-  const hardcodedReply = "This is a hardcoded message";
+  const hardcodedReply = "Hello How can i help you?";
 
   const sendMessage = () => {
     if (inputText.trim() === '') return;
@@ -55,7 +55,7 @@ export default function ChatBot() {
 
   return (
     <LinearGradient
-      colors={['#CE0075', '#0057FB', '#00FFEF']}
+      colors={['#FDF1E6', '#FAD6A5', '#F4A997']}
       style={styles.container}
     >
       <BlurView intensity={100} style={StyleSheet.absoluteFill} />
@@ -64,10 +64,10 @@ export default function ChatBot() {
         style={styles.backButton}
         onPress={() => router.replace('/ProductAnalysis')}
       >
-        <Ionicons name="arrow-back" size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color="black " />
       </TouchableOpacity>
 
-      <Text style={styles.title}>EasyPick Chat</Text>
+      <Text style={styles.title}>ChatBot</Text>
 
       <KeyboardAvoidingView
         style={{ flex: 1, width: '100%' }}
@@ -118,12 +118,9 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: 'outfit-Bold',
     fontSize: width * 0.06, // Dynamically adjust font size
-    color: 'white',
+    color: 'black',
     textAlign: 'center',
     marginBottom: height * 0.03,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
   },
   chatContainer: {
     flexGrow: 1,
@@ -146,7 +143,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   messageText: {
-    color: 'white',
+    color: 'black',
     fontFamily: 'outfit-Regular',
     fontSize: width * 0.04, // Adjust font size dynamically
   },
@@ -169,7 +166,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: height * 0.035, // Adjust radius dynamically
     paddingHorizontal: width * 0.05,
-    color: 'white',
+    color: 'black',
     fontFamily: 'outfit-Regular',
     marginRight: width * 0.02,
   },
