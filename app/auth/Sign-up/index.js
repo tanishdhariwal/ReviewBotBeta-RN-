@@ -166,11 +166,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: 'outfit-Medium',
     color: '#1a1a1a',
     marginBottom: 8,
   },
   subtitle: {
+    fontFamily: 'outfit-Regular',
     fontSize: 16,
     color: '#666',
   },
@@ -214,9 +215,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   signUpButtonText: {
+    fontFamily: 'outfit-Bold',
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
   },
   signInLink: {
     alignItems: 'center',
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
   },
   signInLinkTextBold: {
     color: '#4A00E0',
-    fontWeight: 'bold',
+    fontFamily: 'outfit-Bold',
   },
 });
 
