@@ -22,6 +22,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import WaveAnimation from './../../../components/WaveAnimation';
+import FloatingShapes from './../../../components/FloatingShapes';
 
 const { width, height } = Dimensions.get('window');
 
@@ -72,6 +73,7 @@ export default function SignUp() {
     >
       <StatusBar style="light" />
       <WaveAnimation />
+      <FloatingShapes />
       
       <View style={styles.content}>
         <Animated.View
@@ -166,12 +168,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontFamily: 'outfit-Medium',
+    fontWeight: 'bold',
     color: '#1a1a1a',
     marginBottom: 8,
   },
   subtitle: {
-    fontFamily: 'outfit-Regular',
     fontSize: 16,
     color: '#666',
   },
@@ -215,9 +216,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   signUpButtonText: {
-    fontFamily: 'outfit-Bold',
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   signInLink: {
     alignItems: 'center',
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
   },
   signInLinkTextBold: {
     color: '#4A00E0',
-    fontFamily: 'outfit-Bold',
+    fontWeight: 'bold',
   },
 });
 

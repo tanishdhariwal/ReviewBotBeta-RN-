@@ -8,7 +8,8 @@ import Animated, {
   Easing,
   interpolate,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,10 +44,20 @@ export default function WaveAnimation() {
 
   return (
     <View style={styles.container}>
+      <ExpoLinearGradient
+        colors={['#4A00E0', '#8E2DE2']}
+        style={StyleSheet.absoluteFillObject}
+      />
       <Animated.View style={[styles.waveContainer, animatedStyles]}>
         <Svg height={height * 0.2 + 20} width={width * 2}>
+          <Defs>
+            <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+              <Stop offset="0" stopColor="#4A00E0" stopOpacity="1" />
+              <Stop offset="1" stopColor="#8E2DE2" stopOpacity="1" />
+            </LinearGradient>
+          </Defs>
           <Animated.View style={waveAnimatedStyles}>
-            <Path d={createWavePath()} fill="#4A00E0" />
+            <Path d={createWavePath()} fill="url(#grad)" />
           </Animated.View>
         </Svg>
       </Animated.View>
@@ -62,6 +73,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: height * 0.2,
     overflow: 'hidden',
+    zIndex: 5,
   },
   waveContainer: {
     position: 'absolute',
@@ -71,3 +83,4 @@ const styles = StyleSheet.create({
     height: height * 0.2 + 20,
   },
 });
+

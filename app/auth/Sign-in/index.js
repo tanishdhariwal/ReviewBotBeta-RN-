@@ -12,7 +12,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from './../../../configs/Firebase_Config';  
+import { auth } from './../../../configs/Firebase_Config';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -22,6 +22,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import WaveAnimation from './../../../components/WaveAnimation';
+import FloatingShapes from './../../../components/FloatingShapes';
 
 const { width, height } = Dimensions.get('window');
 
@@ -71,6 +72,7 @@ export default function SignIn() {
     >
       <StatusBar style="light" />
       <WaveAnimation />
+      <FloatingShapes />
       
       <View style={styles.content}>
         <Animated.View
@@ -152,18 +154,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
     paddingTop: height * 0.2,
+    zIndex: 20,
   },
   header: {
     marginBottom: 40,
   },
   title: {
     fontSize: 32,
-    fontFamily:"outfit-Bold",
+    fontWeight: 'bold',
     color: '#1a1a1a',
     marginBottom: 8,
   },
   subtitle: {
-    fontFamily:"outfit-Regular",
     fontSize: 16,
     color: '#666',
   },

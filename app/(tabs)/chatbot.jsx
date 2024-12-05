@@ -55,7 +55,7 @@ export default function ChatBot() {
 
   return (
     <LinearGradient
-      colors={['#FDF1E6', '#FAD6A5', '#F4A997']}
+      colors={['#FFFFFF', '#FFFFFF', '#FFFFFF']}
       style={styles.container}
     >
       <BlurView intensity={100} style={StyleSheet.absoluteFill} />
