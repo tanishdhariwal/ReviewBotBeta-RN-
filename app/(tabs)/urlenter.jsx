@@ -46,7 +46,6 @@ export default function UrlEnter() {
       colors={['#4A00E0', '#8E2DE2']}
       style={styles.container}
     >
-      <FloatingShapes />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileMenuContainer}>
           <Menu

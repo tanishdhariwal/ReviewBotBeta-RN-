@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const ProductAnalysis = () => {
   const router = useRouter();
@@ -138,11 +138,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   productName: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#2d3436',
     marginBottom: 12,
-    textAlign:'center'
+    textAlign: 'center',
   },
   productImage: {
     width: '100%',
@@ -270,4 +270,3 @@ const styles = StyleSheet.create({
 });
 
 export default ProductAnalysis;
-
