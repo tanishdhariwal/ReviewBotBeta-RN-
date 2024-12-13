@@ -8,6 +8,8 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
@@ -21,8 +23,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import WaveAnimation from './../../../components/WaveAnimation';
-import FloatingShapes from './../../../components/FloatingShapes';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
@@ -72,82 +73,103 @@ export default function SignUp() {
       style={styles.container}
     >
       <StatusBar style="light" />
-      <WaveAnimation />
-      <FloatingShapes />
-      
-      <View style={styles.content}>
-        <Animated.View
-          entering={FadeInUp.duration(1000).springify()}
-          style={styles.header}
-        >
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join our community!</Text>
-        </Animated.View>
+      <LinearGradient
+        colors={['#1a1a1a', '#000000']}
+        style={styles.background}
+      />
+      <ScrollView 
+        contentContainerStyle={styles.scrollViewContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <TouchableOpacity onPress={() => router.back()} style={styles.logoContainer}>
+          <Image
+            source={require('./../../../assets/images/Group 1.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+        
+        <View style={styles.content}>
+          <Animated.View
+            entering={FadeInUp.duration(1000).springify()}
+            style={styles.header}
+          >
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Join our AI-powered shopping community!</Text>
+          </Animated.View>
 
-        <Animated.View style={[styles.form, formAnimatedStyle]}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Name"
-              placeholderTextColor="#666"
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#666"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#666"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeIcon}
-            >
-              <Ionicons 
-                name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                size={20} 
-                color="#666" 
+          <Animated.View style={[styles.form, formAnimatedStyle]}>
+            <View style={styles.inputContainer}>
+              <Ionicons name="person-outline" size={20} color="#00FFEF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Name"
+                placeholderTextColor="#888"
+                value={name}
+                onChangeText={setName}
               />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Ionicons name="mail-outline" size={20} color="#00FFEF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#888"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color="#00FFEF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#888"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity 
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
+              >
+                <Ionicons 
+                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={20} 
+                  color="#00FFEF" 
+                />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.signUpButton}
+              onPress={onCreateAccount}
+            >
+              <LinearGradient
+                colors={['#00FFEF', '#0057FB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.buttonGradient}
+              >
+                <Text style={styles.signUpButtonText}>Create Account</Text>
+              </LinearGradient>
             </TouchableOpacity>
-          </View>
 
-          <TouchableOpacity 
-            style={styles.signUpButton}
-            onPress={onCreateAccount}
-          >
-            <Text style={styles.signUpButtonText}>Create Account</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.signInLink}
-            onPress={() => router.replace('auth/Sign-in')}
-          >
-            <Text style={styles.signInLinkText}>
-              Already have an account? <Text style={styles.signInLinkTextBold}>Sign In</Text>
-            </Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+            <TouchableOpacity 
+              style={styles.signInLink}
+              onPress={() => router.replace('auth/Sign-in')}
+            >
+              <Text style={styles.signInLinkText}>
+                Already have an account? <Text style={styles.signInLinkTextBold}>Sign In</Text>
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -155,13 +177,30 @@ export default function SignUp() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+  },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: height,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  logo: {
+    width: width * 0.6,
+    height: 50,
   },
   content: {
-    flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingTop: height * 0.2,
   },
   header: {
     marginBottom: 40,
@@ -169,15 +208,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: '#FFFFFF',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#00FFEF',
+    textAlign: 'center',
   },
   form: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 20,
     padding: 20,
     shadowColor: '#000',
@@ -193,7 +234,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
     marginBottom: 20,
     paddingBottom: 8,
   },
@@ -203,20 +244,22 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#1a1a1a',
+    color: '#FFFFFF',
   },
   eyeIcon: {
     padding: 4,
   },
   signUpButton: {
-    backgroundColor: '#4A00E0',
     borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
+    overflow: 'hidden',
     marginBottom: 20,
   },
+  buttonGradient: {
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
   signUpButtonText: {
-    color: '#fff',
+    color: '#000000',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -224,11 +267,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   signInLinkText: {
-    color: '#666',
+    color: '#CCCCCC',
     fontSize: 14,
   },
   signInLinkTextBold: {
-    color: '#4A00E0',
+    color: '#00FFEF',
     fontWeight: 'bold',
   },
 });
