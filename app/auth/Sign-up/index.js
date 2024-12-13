@@ -1,211 +1,278 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Text, TextInput, View, StyleSheet, TouchableOpacity, Dimensions, Animated, ToastAndroid } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
+  ScrollView,
+} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
-import { Colors } from './../../../constants/Colors';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from './../../../configs/Firebase_Config';
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SignUp() {
   const navigation = useNavigation();
   const router = useRouter();
-
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [nameFocused, setNameFocused] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const nameAnimation = useRef(new Animated.Value(0)).current;
-  const emailAnimation = useRef(new Animated.Value(0)).current;
-  const passwordAnimation = useRef(new Animated.Value(0)).current;
+  const formOpacity = useSharedValue(0);
+  const formTranslateY = useSharedValue(50);
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
+    formOpacity.value = withSpring(1);
+    formTranslateY.value = withSpring(0);
   }, []);
 
+  const formAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: formOpacity.value,
+    transform: [{ translateY: formTranslateY.value }],
+  }));
 
-  const onCreateAccount = () => {
+  const onCreateAccount = async () => {
     if (!name || !email || !password) {
       alert("Please enter all details");
       return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log(user);
-        ToastAndroid.show("Account created successfully", ToastAndroid.LONG);
-        router.replace('/(tabs)/urlenter');
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorMessage, errorCode);
-        alert(errorMessage);
-      });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log(user);
+      alert("Account created successfully");
+      router.replace('/(tabs)/urlenter');
+    } catch (error) {
+      console.log(error.message, error.code);
+      alert(error.message);
+    }
   };
 
   return (
-    <LinearGradient
-      colors={['#CE0075', '#0057FB', '#00FFEF']}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <BlurView intensity={100} style={StyleSheet.absoluteFill} />
-
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
+      <StatusBar style="light" />
+      <LinearGradient
+        colors={['#1a1a1a', '#000000']}
+        style={styles.background}
+      />
+      <ScrollView 
+        contentContainerStyle={styles.scrollViewContent}
+        keyboardShouldPersistTaps="handled"
       >
-        <Ionicons name="arrow-back" size={24} color="white" />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        <Text style={styles.title}>Create New Account</Text>
-        <Text style={styles.subtitle}>Join our community!</Text>
-
-        <Animated.View style={[styles.inputContainer, { transform: [{ scale: nameAnimation.interpolate({ inputRange: [0, 1], outputRange: [1, 1.05] }) }] }]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Name"
-            placeholderTextColor="#888"
-            onChangeText={(value) => setName(value)}
+        <TouchableOpacity onPress={() => router.back()} style={styles.logoContainer}>
+          <Image
+            source={require('./../../../assets/images/Group 1.png')}
+            style={styles.logo}
+            resizeMode="contain"
           />
-        </Animated.View>
-
-        <Animated.View style={[styles.inputContainer, { transform: [{ scale: emailAnimation.interpolate({ inputRange: [0, 1], outputRange: [1, 1.05] }) }] }]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Email"
-            placeholderTextColor="#888"
-            onChangeText={(value) => setEmail(value)}
-          />
-        </Animated.View>
-
-        <Animated.View style={[styles.inputContainer, { transform: [{ scale: passwordAnimation.interpolate({ inputRange: [0, 1], outputRange: [1, 1.05] }) }] }]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Password"
-            placeholderTextColor="#888"
-            secureTextEntry={!showPassword}
-            onChangeText={(value) => setPassword(value)}
-          />
-          <TouchableOpacity 
-            style={styles.eyeIcon} 
-            onPress={() => setShowPassword(!showPassword)}
+        </TouchableOpacity>
+        
+        <View style={styles.content}>
+          <Animated.View
+            entering={FadeInUp.duration(1000).springify()}
+            style={styles.header}
           >
-            <Ionicons 
-              name={showPassword ? 'eye-off' : 'eye'} 
-              size={24} 
-              color="white" 
-            />
-          </TouchableOpacity>
-        </Animated.View>
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Join our AI-powered shopping community!</Text>
+          </Animated.View>
 
-        <TouchableOpacity style={styles.signUpButton} onPress={onCreateAccount}>
-          <Text style={styles.buttonText}>Create Account</Text>
-        </TouchableOpacity>
+          <Animated.View style={[styles.form, formAnimatedStyle]}>
+            <View style={styles.inputContainer}>
+              <Ionicons name="person-outline" size={20} color="#00FFEF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Name"
+                placeholderTextColor="#888"
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
 
-        <TouchableOpacity 
-          style={styles.signInButton}
-          onPress={() => router.replace('auth/Sign-in')}
-        >
-          <Text style={styles.signInText}>Already have an account? Sign In</Text>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
+            <View style={styles.inputContainer}>
+              <Ionicons name="mail-outline" size={20} color="#00FFEF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor="#888"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color="#00FFEF" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#888"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity 
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
+              >
+                <Ionicons 
+                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={20} 
+                  color="#00FFEF" 
+                />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.signUpButton}
+              onPress={onCreateAccount}
+            >
+              <LinearGradient
+                colors={['#00FFEF', '#0057FB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.buttonGradient}
+              >
+                <Text style={styles.signUpButtonText}>Create Account</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.signInLink}
+              onPress={() => router.replace('auth/Sign-in')}
+            >
+              <Text style={styles.signInLinkText}>
+                Already have an account? <Text style={styles.signInLinkTextBold}>Sign In</Text>
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+  },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: height,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
     justifyContent: 'center',
   },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    zIndex: 10,
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  logo: {
+    width: width * 0.6,
+    height: 50,
   },
   content: {
-    width: width * 0.8,
-    maxWidth: 400,
-    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  header: {
+    marginBottom: 40,
   },
   title: {
-    fontFamily: 'outfit-Bold',
     fontSize: 32,
-    color: 'white',
-    marginBottom: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
-    fontFamily: 'outfit-Bold',
-    fontSize: 24,
-    color: 'white',
-    marginBottom: 20,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
+    fontSize: 16,
+    color: '#00FFEF',
+    textAlign: 'center',
+  },
+  form: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   inputContainer: {
-    width: '100%',
-    marginTop: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    height: 60,
-    justifyContent: 'center',
-    shadowColor: "#000",
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 20,
+    paddingBottom: 8,
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   input: {
-    fontFamily: 'outfit-Regular',
+    flex: 1,
     fontSize: 16,
-    color: 'white',
-  },
-  signUpButton: {
-    marginTop: 30,
-    backgroundColor: 'rgba(0, 122, 255, 0.8)',
-    borderRadius: 25,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    shadowColor: "#000",
-  },
-  buttonText: {
-    fontFamily: 'outfit-Bold',
-    color: 'white',
-    fontSize: 18,
-    textAlign: 'center',
-  },
-  signInButton: {
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 25,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-  },
-  signInText: {
-    fontFamily: 'outfit-Regular',
-    color: 'black',
-    fontSize: 14,
-    textAlign: 'center',
+    color: '#FFFFFF',
   },
   eyeIcon: {
-    position: 'absolute',
-    right: 15,
-    height: '100%',
-    justifyContent: 'center',
+    padding: 4,
+  },
+  signUpButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  buttonGradient: {
+    paddingVertical: 14,
     alignItems: 'center',
   },
+  signUpButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  signInLink: {
+    alignItems: 'center',
+  },
+  signInLinkText: {
+    color: '#CCCCCC',
+    fontSize: 14,
+  },
+  signInLinkTextBold: {
+    color: '#00FFEF',
+    fontWeight: 'bold',
+  },
 });
+

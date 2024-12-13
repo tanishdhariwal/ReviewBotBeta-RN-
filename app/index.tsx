@@ -1,6 +1,5 @@
 import { Text, View } from "react-native";
-import Login from '../components/Login'
-
+import GetStarted from '../components/GetStarted'
 import {auth} from './../configs/Firebase_Config'
 
 export default function Index() {
@@ -13,7 +12,7 @@ export default function Index() {
 
       }}
     >
-      <Login/>
+      <GetStarted/>
     </View>
   );
 }
