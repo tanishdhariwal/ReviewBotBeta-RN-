@@ -69,7 +69,7 @@ export default function SignUp() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "android"||"ios" ? "padding" : "height"}
       style={styles.container}
     >
       <StatusBar style="light" />

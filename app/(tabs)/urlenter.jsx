@@ -1,106 +1,119 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text, Animated, Dimensions, Alert, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import { Menu, MenuItem } from 'react-native-material-menu';
-import { auth } from './../../configs/Firebase_Config';
-import FloatingShapes from './../../components/FloatingShapes';
-import ProductSection from './../../components/ProductSection';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import ProfileDropdown from './../../components/ProfileDropdown';
 
 const { width, height } = Dimensions.get('window');
-const user = auth.currentUser;
 
-const validateUrl = (url) => {
-  try {
-    const parsedUrl = new URL(url);
-    return parsedUrl.hostname.includes('amazon');
-  } catch (e) {
-    return false;
-  }
-};
-
-export default function UrlEnter() {
-  const [url, setUrl] = useState('');
-  const [menuVisible, setMenuVisible] = useState(false);
+export default function URLEnter() {
   const router = useRouter();
+  const [url, setUrl] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSend = () => {
-    if (validateUrl(url)) {
-      router.push('/ProductAnalysis');
-      setUrl('');
-    } else {
-      Alert.alert('Invalid URL', 'Please enter a valid Amazon product URL.');
+  const validateAndSubmit = () => {
+    if (!url) {
+      setError('Please enter a URL');
+      return;
+    }
+
+    try {
+      const urlObject = new URL(url);
+      if (!urlObject.hostname.includes('amazon.com')) {
+        setError('Please enter a valid Amazon.com URL');
+        return;
+      }
+
+      // TODO: Navigate to chat page with the validated URL
+      console.log('Valid Amazon URL:', url);
+      setError('');
+    } catch (e) {
+      setError('Please enter a valid URL');
     }
   };
 
-  const showMenu = () => setMenuVisible(true);
-  const hideMenu = () => setMenuVisible(false);
-  const handleLogout = () => {
-    hideMenu();
-    router.replace('/./../auth/Sign-in');
-  };
-  
   return (
-    <LinearGradient
-      colors={['#4A00E0', '#8E2DE2']}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "android" ? "padding" : "height"}
       style={styles.container}
     >
-      <FloatingShapes />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.profileMenuContainer}>
-          <Menu
-            visible={menuVisible}
-            anchor={
-              <TouchableOpacity style={styles.profileButton} onPress={showMenu}>
-                <Ionicons name="person-circle-outline" size={45} color="white" />
-              </TouchableOpacity>
-            }
-            onRequestClose={hideMenu}
-            style={styles.menu}
-          >
-            <MenuItem disabled style={styles.menuItem}>{user?.email}</MenuItem>
-            <MenuItem onPress={handleLogout} style={styles.menuItem}>
-              Logout
-            </MenuItem>
-          </Menu>
-        </View>
+      <StatusBar style="light" />
+      <LinearGradient
+        colors={['#1a1a1a', '#000000']}
+        style={styles.background}
+      />
 
-        <Text style={styles.title}>Summarize Reviews</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.push('/')} style={styles.logoContainer}>
+          <Image
+            source={require('./../../assets/images/Group 1.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+        <ProfileDropdown userName="John Doe" />
+      </View>
 
-        <Animated.View style={styles.card}>
+      <View style={styles.content}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Enter Product URL</Text>
+          <Text style={styles.subtitle}>
+            Paste an Amazon.com product URL to start analyzing reviews
+          </Text>
+
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              value={url}
-              onChangeText={setUrl}
-              placeholder="Enter Amazon product URL"
+              placeholder="https://www.amazon.com/..."
               placeholderTextColor="#888"
+              value={url}
+              onChangeText={(text) => {
+                setUrl(text);
+                setError('');
+              }}
+              autoCapitalize="none"
+              keyboardType="url"
             />
             <TouchableOpacity 
-              style={styles.sendButton} 
-              onPress={handleSend}
+              style={styles.pasteButton}
+              onPress={() => {
+                // TODO: Implement paste functionality
+              }}
             >
-              <Ionicons name="send" size={20} color="white" />
+              <Ionicons name="clipboard-outline" size={20} color="#00FFEF" />
             </TouchableOpacity>
           </View>
-        </Animated.View>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/TopRatedProducts')}>
-            <Ionicons name="star" size={24} color="white" />
-            <Text style={styles.buttonText}>Top Rated</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/RecentlyViewedProducts')}>
-            <Ionicons name="time" size={24} color="white" />
-            <Text style={styles.buttonText}>Recently Viewed</Text>
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+          <TouchableOpacity 
+            style={styles.analyzeButton}
+            onPress={validateAndSubmit}
+          >
+            <LinearGradient
+              colors={['#00FFEF', '#0057FB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.buttonGradient}
+            >
+              <Text style={styles.analyzeButtonText}>Analyze Reviews</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
-
-        <ProductSection title="Top Rated Products" />
-        <ProductSection title="Recently Viewed Products" />
-      </ScrollView>
-    </LinearGradient>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -108,93 +121,95 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
-    alignItems: 'center',
-    paddingTop: 80,
-    paddingBottom: 40,
-  },
-  profileMenuContainer: {
+  background: {
     position: 'absolute',
-    top: 40,
-    right: 20,
-    zIndex: 10,
+    left: 0,
+    right: 0,
+    top: 0,
+    height: height,
   },
-  menu: {
-    marginTop: 50,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    elevation: 5,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingBottom: 20,
   },
-  menuItem: {
-    color: '#4A00E0',
-    fontSize: 16,
-    padding: 10,
+  logoContainer: {
+    height: 40,
   },
-  profileButton: {
-    alignSelf: 'flex-end',
+  logo: {
+    height: '100%',
+    width: 100,
   },
-  title: {
-    fontSize: 32,
-    color: 'white',
-    marginBottom: 40,
-    fontFamily: 'outfit-Bold',
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 20,
-    padding: 20,
-    width: width * 0.9,
-    maxWidth: 400,
+    padding: 24,
+    width: '100%',
+    maxWidth: 500,
     alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    fontFamily: 'outfit-Bold',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#CCCCCC',
+    textAlign: 'center',
+    marginBottom: 24,
+    fontFamily: 'outfit-Regular',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 25,
-    paddingHorizontal: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
     width: '100%',
-    height: 50,
   },
   input: {
     flex: 1,
     height: 50,
+    color: '#FFFFFF',
     fontSize: 16,
-    color: '#333',
+    fontFamily: 'outfit-Regular',
   },
-  sendButton: {
-    backgroundColor: '#4A00E0',
-    borderRadius: 50,
-    padding: 10,
-    marginLeft: 10,
+  pasteButton: {
+    padding: 8,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  errorText: {
+    color: '#FF4444',
+    fontSize: 14,
+    marginBottom: 16,
+    fontFamily: 'outfit-Regular',
+  },
+  analyzeButton: {
     width: '100%',
-    marginTop: 30,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
-  button: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 15,
-    padding: 15,
+  buttonGradient: {
+    paddingVertical: 14,
     alignItems: 'center',
-    width: '40%',
   },
-  buttonText: {
-    color: 'white',
-    marginTop: 5,
+  analyzeButtonText: {
+    color: '#000000',
     fontSize: 16,
-    fontFamily: 'outfit-Medium',
+    fontWeight: 'bold',
+    fontFamily: 'outfit-Bold',
   },
 });
 

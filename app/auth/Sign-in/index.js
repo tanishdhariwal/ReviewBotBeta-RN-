@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from './../../../configs/Firebase_Config';
 import Animated, {
   FadeInDown,
@@ -66,9 +66,23 @@ export default function SignIn() {
     }
   };
 
+  const onForgotPassword = async () => {
+    if (!email) {
+      alert("Please enter your email address");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent!");
+    } catch (error) {
+      console.log(error.message);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "android"||"ios" ? "padding" : "height"}
       style={styles.container}
     >
       <StatusBar style="light" />
@@ -133,7 +147,7 @@ export default function SignIn() {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.forgotPassword}>
+            <TouchableOpacity style={styles.forgotPassword} onPress={onForgotPassword}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 

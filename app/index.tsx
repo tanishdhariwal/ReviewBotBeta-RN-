@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 import GetStarted from '../components/GetStarted'
-import {auth} from './../configs/Firebase_Config'
+import {auth} from '../configs/Firebase_Config'
 
 export default function Index() {
 
