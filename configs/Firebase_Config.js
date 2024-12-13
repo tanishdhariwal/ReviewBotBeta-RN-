@@ -8,7 +8,7 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_GOOGLE_API_KEY,
+  apiKey: process.env.EXPO_PUBLIC_GOOGLE_FIREBASE_KEY,
   authDomain: "aitripplanner-3b773.firebaseapp.com",
   projectId: "aitripplanner-3b773",
   storageBucket: "aitripplanner-3b773.firebasestorage.app",
