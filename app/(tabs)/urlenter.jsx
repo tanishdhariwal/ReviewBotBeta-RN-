@@ -46,7 +46,7 @@ export default function URLEnter() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "android" ? "padding" : "height"}
+      behavior={Platform.OS === "android"||"ios" ? "padding" : "height"}
       style={styles.container}
     >
       <StatusBar style="light" />
@@ -56,14 +56,14 @@ export default function URLEnter() {
       />
 
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/')} style={styles.logoContainer}>
+        <TouchableOpacity onPress={() => router.push('./urlenter')} style={styles.logoContainer}>
           <Image
             source={require('./../../assets/images/Group 1.png')}
             style={styles.logo}
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <ProfileDropdown userName="John Doe" />
+        <ProfileDropdown userName />
       </View>
 
       <View style={styles.content}>
