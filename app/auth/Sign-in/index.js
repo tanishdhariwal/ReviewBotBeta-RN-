@@ -27,6 +27,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
+
+
 export default function SignIn() {
   const navigation = useNavigation();
   const router = useRouter();
