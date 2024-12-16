@@ -10,11 +10,11 @@ import {
   Platform,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth } from './../../../configs/Firebase_Config';
+import { LoginUser } from './../../../utils/auth';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -50,33 +50,34 @@ export default function SignIn() {
 
   const onSignIn = async () => {
     if (!email || !password) {
-      alert("Please enter all details");
+      Alert.alert("Please enter all details");
       return;
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userData = { email, password };
+      console.log(" before req", userData);
+      await LoginUser(userData);
+      console.log(" after req", userData);
       router.replace('/(tabs)/urlenter');
     } catch (error) {
-      if (error.code === "auth/invalid-credential") {
-        alert("Invalid Credentials!");
-      } else {
-        alert("An error occurred. Please try again.");
-      }
+      Alert.alert("An error occurred. Please try again.");
     }
   };
 
   const onForgotPassword = async () => {
     if (!email) {
-      alert("Please enter your email address");
+      Alert.alert("Please enter your email address");
       return;
     }
     try {
-      await sendPasswordResetEmail(auth, email);
-      alert("Password reset email sent!");
+      // Implement forgot password logic using custom auth
+      // For example, if you have a function sendPasswordResetEmail in your custom auth
+      await sendPasswordResetEmail(email); // Make sure to define this function in your custom auth
+      Alert.alert("Password reset email sent!");
     } catch (error) {
       console.log(error.message);
-      alert("An error occurred. Please try again.");
+      Alert.alert("An error occurred. Please try again.");
     }
   };
 

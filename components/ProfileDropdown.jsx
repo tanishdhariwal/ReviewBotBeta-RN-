@@ -6,7 +6,7 @@ import { auth } from '../configs/Firebase_Config';
 import { useRouter } from 'expo-router';
 
 export default function ProfileDropdown({ userName }) {
-  userName = auth.currentUser.displayName;
+  userName = "John Doe";
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
