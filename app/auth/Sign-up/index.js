@@ -13,8 +13,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from './../../../configs/Firebase_Config';
+
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -24,13 +23,14 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SignUpUser } from '../../../apiComms';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SignUp() {
   const navigation = useNavigation();
   const router = useRouter();
-  const [name, setName] = useState('');
+  const [username, setusername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -50,17 +50,20 @@ export default function SignUp() {
   }));
 
   const onCreateAccount = async () => {
-    if (!name || !email || !password) {
+    if (!username || !email || !password) {
       alert("Please enter all details");
       return;
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      // const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+
+      // const user = userCredential.user;
+      const userData = { username, email, password };
+      const user = await SignUpUser(userData);
       console.log(user);
       alert("Account created successfully");
-      router.replace('/(tabs)/urlenter');
+      router.replace('/auth/Sign-in');
     } catch (error) {
       console.log(error.message, error.code);
       alert(error.message);
@@ -105,8 +108,8 @@ export default function SignUp() {
                 style={styles.input}
                 placeholder="Name"
                 placeholderTextColor="#888"
-                value={name}
-                onChangeText={setName}
+                value={username}
+                onChangeText={setusername}
               />
             </View>
 

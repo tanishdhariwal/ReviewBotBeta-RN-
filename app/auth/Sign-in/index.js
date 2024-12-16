@@ -13,8 +13,6 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth } from './../../../configs/Firebase_Config';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -24,6 +22,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { LoginUser } from '../../../apiComms';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -57,13 +57,20 @@ export default function SignIn() {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const payload = { email, password };
+      const response = await LoginUser(payload);
+      // storing the response in AsyncStorage
+      console.log(response);
+      await AsyncStorage.setItem('user', JSON.stringify(response.data));
+      console.log(response);
+
       router.replace('/(tabs)/urlenter');
     } catch (error) {
       if (error.code === "auth/invalid-credential") {
         alert("Invalid Credentials!");
       } else {
-        alert("An error occurred. Please try again.");
+        alert("An error occurred. Please try gay.");
       }
     }
   };
