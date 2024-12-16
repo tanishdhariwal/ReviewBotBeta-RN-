@@ -10,10 +10,10 @@ import {
   Platform,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
-
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -27,7 +27,7 @@ import { SignUpUser } from '../../../apiComms';
 
 const { width, height } = Dimensions.get('window');
 
-export default function SignUp() {
+const SignUp = () => {
   const navigation = useNavigation();
   const router = useRouter();
   const [username, setusername] = useState('');
@@ -52,10 +52,12 @@ export default function SignUp() {
   const onCreateAccount = async () => {
     if (!username || !email || !password) {
       alert("Please enter all details");
+
       return;
     }
 
     try {
+
       // const userCredential = await createUserWithEmailAndPassword(auth, email, password)
 
       // const user = userCredential.user;
@@ -63,10 +65,10 @@ export default function SignUp() {
       const user = await SignUpUser(userData);
       console.log(user);
       alert("Account created successfully");
+
       router.replace('/auth/Sign-in');
     } catch (error) {
-      console.log(error.message, error.code);
-      alert(error.message);
+      Alert.alert("An error occurred. Please try again.");
     }
   };
 
@@ -150,7 +152,7 @@ export default function SignUp() {
 
             <TouchableOpacity 
               style={styles.signUpButton}
-              onPress={onCreateAccount}
+              onPress={onSignUp}
             >
               <LinearGradient
                 colors={['#00FFEF', '#0057FB']}
@@ -176,6 +178,8 @@ export default function SignUp() {
     </KeyboardAvoidingView>
   );
 }
+
+export default SignUp;
 
 const styles = StyleSheet.create({
   container: {

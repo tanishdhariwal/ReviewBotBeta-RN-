@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import asyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileDropdown({ userName }) {
-  // userName = auth.currentUser.displayName;
+
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 

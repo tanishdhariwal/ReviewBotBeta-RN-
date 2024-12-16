@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Alert } from 'react-native';
 
 // Set the base URL for axios requests
+
 axios.defaults.baseURL = 'http://192.168.186.58:5000'; // Replace with your backend URL
 
 // export default axios;
