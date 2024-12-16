@@ -152,7 +152,7 @@ const SignUp = () => {
 
             <TouchableOpacity 
               style={styles.signUpButton}
-              onPress={onSignUp}
+              onPress={onCreateAccount}
             >
               <LinearGradient
                 colors={['#00FFEF', '#0057FB']}
