@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { signOut } from 'firebase/auth';
-import { auth } from '../configs/Firebase_Config';
 import { useRouter } from 'expo-router';
+import asyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileDropdown({ userName }) {
-  userName = auth.currentUser.displayName;
+
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await asyncStorage.removeItem('user');
+      Alert.alert('Logged out successfully');
       router.replace('/');
     } catch (error) {
       console.error('Error signing out:', error);

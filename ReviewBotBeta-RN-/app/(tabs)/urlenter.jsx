@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,14 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import ProfileDropdown from './../../components/ProfileDropdown';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,6 +24,22 @@ export default function URLEnter() {
   const router = useRouter();
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const user = await AsyncStorage.getItem('user');
+        if (user !== null) {
+          setUserName(JSON.parse(user).username);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user from AsyncStorage', error);
+      }
+    };
+
+    fetchUserName();
+  }, []);
 
   const validateAndSubmit = () => {
     if (!url) {
@@ -29,24 +47,15 @@ export default function URLEnter() {
       return;
     }
 
-    try {
-      const urlObject = new URL(url);
-      if (!urlObject.hostname.includes('amazon.com')) {
-        setError('Please enter a valid Amazon.com URL');
-        return;
-      }
-
-      // TODO: Navigate to chat page with the validated URL
-      console.log('Valid Amazon URL:', url);
-      setError('');
-    } catch (e) {
-      setError('Please enter a valid URL');
-    }
+    const asinRegex = /\/([A-Z0-9]{10})(?=\/|$|\?)/;
+    const match = url.match(asinRegex);
+    return match ? { "asin": match[1] } : { "asin": "false" };
+    
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "android"||"ios" ? "padding" : "height"}
+      behavior={Platform.OS === "android" || "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <StatusBar style="light" />
@@ -63,14 +72,14 @@ export default function URLEnter() {
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <ProfileDropdown userName />
+        <ProfileDropdown userName={userName}/>
       </View>
 
       <View style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.title}>Enter Product URL</Text>
           <Text style={styles.subtitle}>
-            Paste an Amazon.com product URL to start analyzing reviews
+            Paste an Amazon.com product URL to start analyzing reviews  {userName}
           </Text>
 
           <View style={styles.inputContainer}>
@@ -86,7 +95,7 @@ export default function URLEnter() {
               autoCapitalize="none"
               keyboardType="url"
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.pasteButton}
               onPress={() => {
                 // TODO: Implement paste functionality
@@ -98,7 +107,7 @@ export default function URLEnter() {
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.analyzeButton}
             onPress={validateAndSubmit}
           >
