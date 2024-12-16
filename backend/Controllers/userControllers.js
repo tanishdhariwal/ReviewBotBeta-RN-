@@ -109,7 +109,6 @@ const login = async (req, res) => {
 const verifyuser = async (req, res) => {
   console.log("verifying user");
   try {
-    // console.log("JWT Data:", res.locals.jwtData);
 
     const user = await User.findById(res.locals.jwtData.id);
     if (!user) {

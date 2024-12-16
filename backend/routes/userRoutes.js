@@ -20,7 +20,7 @@ userRouter.get("/authstatus", verifyToken, verifyuser);
 userRouter.get("/get_user", verifyToken, get_user); 
 userRouter.get("/get_user_chats", verifyToken, get_user_chats);
 userRouter.get("/", (req, res) => {
-  res.status(200).send("Hello from the server");
+  res.status(200).json({ message: req.headers['device-type'] });
 });
 
 module.exports = userRouter;

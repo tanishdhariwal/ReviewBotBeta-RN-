@@ -1,10 +1,15 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const COOKIE_NAME = process.env.COOKIE_NAME;
 
 const verifyToken = async (req, res, next) => {
   console.log("verifying token");
-  const token = req.signedCookies[COOKIE_NAME];
+  let token;
+  if (req.headers["device-type"] === "Mobile") {
+    token = req.headers["authorization"];
+  } else {
+    token = req.signedCookies[COOKIE_NAME];
+  }
   // console.log("token:", token);
   if (!token || token.trim() === "") {
     console.log("Token not received");
