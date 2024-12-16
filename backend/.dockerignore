@@ -1,0 +1,7 @@
+node_modules
+dist
+.git
+.dockerignore
+testings
+.vscode
+testing-3
