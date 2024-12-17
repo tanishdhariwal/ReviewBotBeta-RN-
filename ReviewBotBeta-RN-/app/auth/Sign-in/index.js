@@ -16,7 +16,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useNavigation, useRouter } from 'expo-router';
 
 import Animated, {
-  FadeInDown,
   FadeInUp,
   useAnimatedStyle,
   useSharedValue,

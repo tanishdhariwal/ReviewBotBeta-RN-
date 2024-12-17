@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ProfileDropdown from "./../../components/ProfileDropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { checkURL } from "../../apiComms";
+import * as Clipboard from "expo-clipboard";
 
 const { width, height } = Dimensions.get("window");
 
@@ -76,7 +77,7 @@ export default function URLEnter() {
           if (data.isValid) {
             AsyncStorage.setItem("asin", validationResponse.asin);
             //navigate(`/analysis`, { state: { asin: validationResponse.asin } });
-            router.push("/chatbot", { asin: validationResponse.asin });
+            router.push("/ProductAnalysis", { asin: validationResponse.asin });
           }
         }
       } catch (error) {
@@ -135,8 +136,9 @@ export default function URLEnter() {
             />
             <TouchableOpacity
               style={styles.pasteButton}
-              onPress={() => {
-                // TODO: Implement paste functionality
+              onPress={async () => {
+                const clipboardContent = await Clipboard.getStringAsync();
+                setUrl(clipboardContent);
               }}
             >
               <Ionicons name="clipboard-outline" size={20} color="#00FFEF" />
