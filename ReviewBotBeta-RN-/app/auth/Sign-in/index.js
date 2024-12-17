@@ -73,7 +73,7 @@ export default function SignIn() {
       if (error.code === "auth/invalid-credential") {
         alert("Invalid Credentials!");
       } else {
-        alert("An error occurred. Please try gay.");
+        alert("An error occurred. Please try again.");
       }
 
     }

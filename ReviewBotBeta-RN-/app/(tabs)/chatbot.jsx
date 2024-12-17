@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
+import { getProduct, getChatResponse, get_user_chat } from '../../apiComms';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -12,11 +13,68 @@ export default function ChatBot() {
   const router = useRouter();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef(null);
+  const [product, setProduct] = useState(null);
 
-  const hardcodedReply = "Hello How can i help you?";
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        let asin = await AsyncStorage.getItem('asin');
+        Alert.alert("asin");
+        console.log(asin);
+        const productData = await getProduct(asin); // Use the provided ASIN
+        setProduct(productData);
+      } catch (error) {
+        console.error('Failed to fetch product details:', error);
+      }
+    };
 
-  const sendMessage = () => {
+    fetchProduct();
+  }, []);
+
+  useEffect(() => {
+    const fetchExistingChats = async () => {
+      try {
+        const asin = await AsyncStorage.getItem('asin');
+        const data = await get_user_chat({ product_asin: asin });
+        if (data && data.exchanges && data.exchanges.length > 0) {
+          const messages = data.exchanges.flatMap((exchange, index) => {
+            const msgs = [];
+            if (exchange.user_query && exchange.user_query.trim()) {
+              msgs.push({
+                id: `${index}-user`,
+                text: exchange.user_query,
+                isUser: true,
+              });
+            }
+            if (exchange.bot_response && exchange.bot_response.trim()) {
+              msgs.push({
+                id: `${index}-bot`,
+                text: exchange.bot_response,
+                isUser: false,
+              });
+            }
+            return msgs;
+          });
+          setMessages(messages);
+        } else {
+          setMessages([
+            { id: '1', text: "Hello! How can I assist you today?", isUser: false },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching existing chats:', error);
+        setMessages([
+          { id: '1', text: "Hello! How can I assist you today?", isUser: false },
+        ]);
+      }
+    };
+
+    fetchExistingChats();
+  }, [product]);
+
+  const sendMessage = async () => {
     if (inputText.trim() === '') return;
 
     const newUserMessage = {
@@ -27,16 +85,22 @@ export default function ChatBot() {
 
     setMessages(prevMessages => [...prevMessages, newUserMessage]);
     setInputText('');
+    setIsLoading(true);
 
-    // Simulate a delay before the AI responds
-    setTimeout(() => {
+    try {
+      const asin = await AsyncStorage.getItem('asin');
+      const data = await getChatResponse({ currentMessage: inputText, productASIN: asin });
       const newAIMessage = {
         id: (Date.now() + 1).toString(),
-        text: hardcodedReply,
+        text: data.response,
         isUser: false,
       };
       setMessages(prevMessages => [...prevMessages, newAIMessage]);
-    }, 1000);
+    } catch (error) {
+      console.error('Error fetching AI response:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -51,7 +115,6 @@ export default function ChatBot() {
       keyboardDidShowListener.remove();
     };
   }, []);
-  
 
   return (
     <LinearGradient
@@ -153,12 +216,6 @@ const styles = StyleSheet.create({
     width: width * 0.9, // Adjust width dynamically
     alignSelf: 'center',
     marginBottom: height * 0.02, // Avoid overlap
-  },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    zIndex: 10,
   },
   input: {
     flex: 1,

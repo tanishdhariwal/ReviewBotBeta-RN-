@@ -1,36 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getProduct } from '../apiComms';
 
 const { width } = Dimensions.get('window');
 
 const ProductAnalysis = () => {
   const router = useRouter();
+  const [product, setProduct] = useState(null);
 
-  const product = {
-    name: "Premium Wireless Headphones",
-    price: "$149.99",
-    reviewCount: "15,244 reviews",
-    imageUrl: "https://img.freepik.com/free-vector/illustration-headphones-icon_53876-5571.jpg",
-    metrics: [
-      { name: "Quality", score: 85, color: ['#3498db', '#2980b9'] },
-      { name: "Value for Money", score: 75, color: ['#2ecc71', '#27ae60'] },
-      { name: "Customer Service", score: 92, color: ['#f1c40f', '#f39c12'] },
-      { name: "Durability", score: 80, color: ['#9b59b6', '#8e44ad'] },
-      { name: "Ease of Use", score: 88, color: ['#e74c3c', '#c0392b'] }
-    ],
-    summary: {
-      reporter: 20,
-      highlights: [
-        "Premium build quality with excellent sound isolation",
-        "Advanced noise cancellation technology",
-        "30+ hours battery life",
-        "Comfortable for long listening sessions"
-      ]
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        let asin = await AsyncStorage.getItem('asin');
+        const productData = await getProduct(asin); // Use the provided ASIN
+        setProduct(productData);
+      } catch (error) {
+        console.error('Failed to fetch product details:', error);
+      }
+    };
+
+    fetchProduct();
+  }, []);
+
+  if (!product) {
+    return <Text>Loading...</Text>;
+  }
+
+  const getSentimentColor = (sentiment) => {
+    switch (sentiment) {
+      case 'POSITIVE':
+        return 'green';
+      case 'MIXED':
+        return 'orange';
+      case 'NEGATIVE':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -54,24 +65,24 @@ const ProductAnalysis = () => {
   return (
     <View style={styles.container}>
       <ScrollView>
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="arrow-back" size={24} color="black" />
-      </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
 
         <View style={styles.productSection}>
           <View style={styles.productInfo}>
-            <Text style={styles.productName}>{product.name}</Text>
+            <Text style={styles.productName}>{product.title}</Text>
             <Image
-              source={{ uri: product.imageUrl }}
+              source={{ uri: product.image_url[0] }}
               style={styles.productImage}
               defaultSource={require('./../assets/images/image.png')}
             />
             <View style={styles.priceContainer}>
               <Text style={styles.price}>{product.price}</Text>
-              <Text style={styles.reviewCount}>{product.reviewCount}</Text>
+              <Text style={styles.reviewCount}>{product.ratings_distribution.length} reviews</Text>
             </View>
           </View>
 
@@ -79,22 +90,31 @@ const ProductAnalysis = () => {
             <View style={styles.summaryHeader}>
               <Text style={styles.summaryTitle}>Review Summary</Text>
               <View style={styles.reporterBadge}>
-                <Text style={styles.reporterText}>Reporter {product.summary.reporter}%</Text>
+                <Text style={styles.reporterText}>Rating {product.average_rating}</Text>
               </View>
             </View>
             
             <View style={styles.highlightsContainer}>
-              {product.summary.highlights.map((highlight, index) => (
-                <Text key={index} style={styles.highlight}>• {highlight}</Text>
-              ))}
+              <Text style={styles.highlight}>{product.review_summary}</Text>
             </View>
           </View>
 
           <View style={styles.metricsSection}>
-            {product.metrics.map((metric, index) => (
-              <RatingBar key={index} metric={metric} />
+            {product.ratings_distribution.map((metric, index) => (
+              <RatingBar key={index} metric={{ name: `Rating ${metric.rating}`, score: metric.distribution, color: ['#3498db', '#2980b9'] }} />
             ))}
           </View>
+
+          {product.customer_sentiments && product.customer_sentiments.length > 0 && (
+            <View style={styles.sentimentsSection}>
+              <Text style={styles.sentimentsTitle}>Customer Sentiments</Text>
+              {product.customer_sentiments.map((sentiment, index) => (
+                <Text key={index} style={styles.sentimentText}>
+                  {sentiment.title} : <Text style={{ color: getSentimentColor(sentiment.sentiment) }}>{sentiment.sentiment}</Text>
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
       <TouchableOpacity
@@ -250,6 +270,27 @@ const styles = StyleSheet.create({
   bar: {
     height: '100%',
     borderRadius: 4,
+  },
+  sentimentsSection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sentimentsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d3436',
+    marginBottom: 12,
+  },
+  sentimentText: {
+    fontSize: 16,
+    marginBottom: 8,
   },
   chatButton: {
     position: 'absolute',

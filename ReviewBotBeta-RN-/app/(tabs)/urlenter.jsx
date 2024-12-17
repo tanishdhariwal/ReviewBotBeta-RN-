@@ -43,19 +43,31 @@ export default function URLEnter() {
 
     fetchUserName();
   }, []);
+
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchUserChats = async () => {
       try {
-        let asin = AsyncStorage.getItem('asin');
-        const productData = await getProduct(asin); // Use the provided ASIN
-        setProduct(productData);
+        const products = await getUserChats();
+        setPreviousChats(products);
       } catch (error) {
-        console.error('Failed to fetch product details:', error);
+        console.error('Error fetching user chats:', error);
       }
     };
+    fetchUserChats()
+  });
+  // useEffect(() => {
+  //   const fetchProduct = async () => {
+  //     try {
+  //       let asin = AsyncStorage.getItem('asin');
+  //       const productData = await getProduct(asin); // Use the provided ASIN
+  //       setProduct(productData);
+  //     } catch (error) {
+  //       console.error('Failed to fetch product details:', error);
+  //     }
+  //   };
 
-    fetchProduct();
-  }, []);
+  //   fetchProduct();
+  // }, []);
   const validateAndSubmit = () => {
     if (!url) {
       setError("Please enter a URL");
@@ -73,10 +85,11 @@ export default function URLEnter() {
         if (validationResponse.asin !== "false") {
           //setIsLoading(true);
           const data = await checkURL({ asin: validationResponse.asin });
+          const asin = validationResponse.asin;
           if (data.isValid) {
-            AsyncStorage.setItem("asin", validationResponse.asin);
+            await AsyncStorage.setItem("asin", asin);
             //navigate(`/analysis`, { state: { asin: validationResponse.asin } });
-            router.push("/chatbot", { asin: validationResponse.asin });
+            router.push("/ProductAnalysis", { asin: validationResponse.asin });
           }
         }
       } catch (error) {
