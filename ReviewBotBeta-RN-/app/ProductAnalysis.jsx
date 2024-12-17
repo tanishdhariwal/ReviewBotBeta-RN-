@@ -1,36 +1,65 @@
-import React from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getProduct, getUserChats } from '../apiComms';
 
 const { width } = Dimensions.get('window');
 
 const ProductAnalysis = () => {
   const router = useRouter();
+  const [product, setProduct] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userChats, setUserChats] = useState([]);
 
-  const product = {
-    name: "Premium Wireless Headphones",
-    price: "$149.99",
-    reviewCount: "15,244 reviews",
-    imageUrl: "https://img.freepik.com/free-vector/illustration-headphones-icon_53876-5571.jpg",
-    metrics: [
-      { name: "Quality", score: 85, color: ['#3498db', '#2980b9'] },
-      { name: "Value for Money", score: 75, color: ['#2ecc71', '#27ae60'] },
-      { name: "Customer Service", score: 92, color: ['#f1c40f', '#f39c12'] },
-      { name: "Durability", score: 80, color: ['#9b59b6', '#8e44ad'] },
-      { name: "Ease of Use", score: 88, color: ['#e74c3c', '#c0392b'] }
-    ],
-    summary: {
-      reporter: 20,
-      highlights: [
-        "Premium build quality with excellent sound isolation",
-        "Advanced noise cancellation technology",
-        "30+ hours battery life",
-        "Comfortable for long listening sessions"
-      ]
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        let asin = await AsyncStorage.getItem('asin');
+        const productData = await getProduct(asin); // Use the provided ASIN
+        setProduct(productData);
+      } catch (error) {
+        console.error('Failed to fetch product details:', error);
+      }
+    };
+
+    fetchProduct();
+  }, []);
+
+  const fetchUserChats = async () => {
+    try {
+      const response = await getUserChats();
+      setUserChats(response);
+      setModalVisible(true);
+    } catch (error) {
+      console.error('Failed to fetch user chats:', error);
+    }
+  };
+
+  const handleChatPress = async (asin) => {
+    await AsyncStorage.setItem('asin', asin);
+    setModalVisible(false);
+    router.replace('/ProductAnalysis');
+  };
+
+  if (!product) {
+    return <Text>Loading...</Text>;
+  }
+
+  const getSentimentColor = (sentiment) => {
+    switch (sentiment) {
+      case 'POSITIVE':
+        return 'green';
+      case 'MIXED':
+        return 'orange';
+      case 'NEGATIVE':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -54,24 +83,24 @@ const ProductAnalysis = () => {
   return (
     <View style={styles.container}>
       <ScrollView>
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="arrow-back" size={24} color="black" />
-      </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.push('/urlenter')}
+        >
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
 
         <View style={styles.productSection}>
           <View style={styles.productInfo}>
-            <Text style={styles.productName}>{product.name}</Text>
+            <Text style={styles.productName}>{product.title}</Text>
             <Image
-              source={{ uri: product.imageUrl }}
+              source={{ uri: product.image_url[0] }}
               style={styles.productImage}
               defaultSource={require('./../assets/images/image.png')}
             />
             <View style={styles.priceContainer}>
               <Text style={styles.price}>{product.price}</Text>
-              <Text style={styles.reviewCount}>{product.reviewCount}</Text>
+              <Text style={styles.reviewCount}>{product.ratings_distribution.length | "not available"} reviews</Text>
             </View>
           </View>
 
@@ -79,22 +108,31 @@ const ProductAnalysis = () => {
             <View style={styles.summaryHeader}>
               <Text style={styles.summaryTitle}>Review Summary</Text>
               <View style={styles.reporterBadge}>
-                <Text style={styles.reporterText}>Reporter {product.summary.reporter}%</Text>
+                <Text style={styles.reporterText}>Rating {product.average_rating}</Text>
               </View>
             </View>
             
             <View style={styles.highlightsContainer}>
-              {product.summary.highlights.map((highlight, index) => (
-                <Text key={index} style={styles.highlight}>• {highlight}</Text>
-              ))}
+              <Text style={styles.highlight}>{product.review_summary}</Text>
             </View>
           </View>
 
           <View style={styles.metricsSection}>
-            {product.metrics.map((metric, index) => (
-              <RatingBar key={index} metric={metric} />
+            {product.ratings_distribution.map((metric, index) => (
+              <RatingBar key={index} metric={{ name: `Rating ${metric.rating}`, score: metric.distribution, color: ['#3498db', '#2980b9'] }} />
             ))}
           </View>
+
+          {product.customer_sentiments && product.customer_sentiments.length > 0 && (
+            <View style={styles.sentimentsSection}>
+              <Text style={styles.sentimentsTitle}>Customer Sentiments</Text>
+              {product.customer_sentiments.map((sentiment, index) => (
+                <Text key={index} style={styles.sentimentText}>
+                  {sentiment.title} : <Text style={{ color: getSentimentColor(sentiment.sentiment) }}>{sentiment.sentiment}</Text>
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
       <TouchableOpacity
@@ -103,6 +141,49 @@ const ProductAnalysis = () => {
       >
         <MaterialCommunityIcons name="chat" size={24} color="#fff" />
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.userChatsButton}
+        onPress={fetchUserChats}
+      >
+        <MaterialCommunityIcons name="history" size={24} color="#fff" />
+      </TouchableOpacity>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Previous Chats</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={userChats}
+              keyExtractor={(item) => item.product_asin_no}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={styles.chatTile}
+                  onPress={() => handleChatPress(item.product_asin_no)}
+                >
+                  <View>
+                    <Text style={styles.chatTitle}>{item.title}</Text>
+                    <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#666" />
+                </TouchableOpacity>
+              )}
+              style={styles.chatList}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -251,6 +332,27 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 4,
   },
+  sentimentsSection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sentimentsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d3436',
+    marginBottom: 12,
+  },
+  sentimentText: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
   chatButton: {
     position: 'absolute',
     right: 20,
@@ -266,6 +368,74 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  userChatsButton: {
+    position: 'absolute',
+    left: 20,
+    bottom: 20,
+    backgroundColor: '#3498db',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    minHeight: '50%',
+    maxHeight: '80%',
+    width: '100%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2d3436',
+  },
+  closeButton: {
+    padding: 5,
+  },
+  chatList: {
+    marginTop: 10,
+  },
+  chatTile: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+  },
+  chatTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2d3436',
+    marginBottom: 4,
+  },
+  chatDate: {
+    fontSize: 14,
+    color: '#636e72',
   },
 });
 

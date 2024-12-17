@@ -50,6 +50,7 @@ const productUrlCheck = async (req, res, next) => {
       return res.status(200).json({ isValid: true, existsInDB: true });
     } else {
       req.asin = asin;
+      console.log("Product not found in DB. Proceeding to scrape URL.");
       next();
     }
   } catch (err) {
