@@ -120,10 +120,15 @@ export const getChatResponse = async (payload) => {
 
 export const getUserChats = async () => {
   try {
+    const userjson = await AsyncStorage.getItem("user");
+    const user = JSON.parse(userjson);
+    console.log(user.token);
     const response = await axios.get(`/get_user_chats`, { headers: { "device-type": "Mobile", "Content-Type": "application/json", "authorization" : user.token }},);
+    console.log(response.data);
     return response.data;
   } catch (error) {
-    toast.error('Error fetching user chats.');
+    // toast.error('Error fetching user chats.');
+    Alert.alert("Error fetching user chats.");
     throw error;
   }
 };

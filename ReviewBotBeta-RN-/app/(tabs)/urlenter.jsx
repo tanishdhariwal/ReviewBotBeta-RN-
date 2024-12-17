@@ -10,6 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Modal,
+  FlatList,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
@@ -17,7 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import ProfileDropdown from "./../../components/ProfileDropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { checkURL } from "../../apiComms";
+import { checkURL, getUserChats } from "../../apiComms";
 
 const { width, height } = Dimensions.get("window");
 
@@ -27,7 +29,8 @@ export default function URLEnter() {
   const [error, setError] = useState("");
   const [userName, setUserName] = useState("");
   const [productData, setProduct] = useState(null);
-  //const [isLoading, setIsLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userChats, setUserChats] = useState([]);
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -44,30 +47,22 @@ export default function URLEnter() {
     fetchUserName();
   }, []);
 
-  useEffect(() => {
-    const fetchUserChats = async () => {
-      try {
-        const products = await getUserChats();
-        setPreviousChats(products);
-      } catch (error) {
-        console.error('Error fetching user chats:', error);
-      }
-    };
-    fetchUserChats()
-  });
-  // useEffect(() => {
-  //   const fetchProduct = async () => {
-  //     try {
-  //       let asin = AsyncStorage.getItem('asin');
-  //       const productData = await getProduct(asin); // Use the provided ASIN
-  //       setProduct(productData);
-  //     } catch (error) {
-  //       console.error('Failed to fetch product details:', error);
-  //     }
-  //   };
+  const fetchUserChats = async () => {
+    try {
+      const response = await getUserChats();
+      setUserChats(response);
+      setModalVisible(true);
+    } catch (error) {
+      console.error('Failed to fetch user chats:', error);
+    }
+  };
 
-  //   fetchProduct();
-  // }, []);
+  const handleChatPress = async (asin) => {
+    await AsyncStorage.setItem('asin', asin);
+    setModalVisible(false);
+    router.replace('/ProductAnalysis');
+  };
+
   const validateAndSubmit = () => {
     if (!url) {
       setError("Please enter a URL");
@@ -171,8 +166,60 @@ export default function URLEnter() {
               <Text style={styles.analyzeButtonText}>Analyze Reviews</Text>
             </LinearGradient>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.userChatsButton}
+            onPress={fetchUserChats}
+          >
+            <LinearGradient
+              colors={["#00FFEF", "#0057FB"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.buttonGradient}
+            >
+              <Text style={styles.userChatsButtonText}>View Previous Chats</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Previous Chats</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={userChats}
+              keyExtractor={(item) => item.product_asin_no}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={styles.chatTile}
+                  onPress={() => handleChatPress(item.product_asin_no)}
+                >
+                  <View>
+                    <Text style={styles.chatTitle}>{item.title}</Text>
+                    <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#666" />
+                </TouchableOpacity>
+              )}
+              style={styles.chatList}
+            />
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -270,5 +317,72 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     fontFamily: "outfit-Bold",
+  },
+  userChatsButton: {
+    width: "100%",
+    marginTop: 16,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  userChatsButtonText: {
+    color: "#000000",
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "outfit-Bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    minHeight: '50%',
+    maxHeight: '80%',
+    width: '100%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2d3436',
+    fontFamily: "outfit-Bold",
+  },
+  closeButton: {
+    padding: 5,
+  },
+  chatList: {
+    marginTop: 10,
+  },
+  chatTile: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+  },
+  chatTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2d3436',
+    marginBottom: 4,
+    fontFamily: "outfit-Regular",
+  },
+  chatDate: {
+    fontSize: 14,
+    color: '#636e72',
+    fontFamily: "outfit-Regular",
   },
 });

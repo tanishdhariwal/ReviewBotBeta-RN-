@@ -21,7 +21,7 @@ export default function ChatBot() {
     const fetchProduct = async () => {
       try {
         let asin = await AsyncStorage.getItem('asin');
-        Alert.alert("asin");
+        Alert.alert(asin);
         console.log(asin);
         const productData = await getProduct(asin); // Use the provided ASIN
         setProduct(productData);

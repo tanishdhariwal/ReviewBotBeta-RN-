@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getProduct } from '../apiComms';
+import { getProduct, getUserChats } from '../apiComms';
 
 const { width } = Dimensions.get('window');
 
 const ProductAnalysis = () => {
   const router = useRouter();
   const [product, setProduct] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userChats, setUserChats] = useState([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -27,6 +29,22 @@ const ProductAnalysis = () => {
 
     fetchProduct();
   }, []);
+
+  const fetchUserChats = async () => {
+    try {
+      const response = await getUserChats();
+      setUserChats(response);
+      setModalVisible(true);
+    } catch (error) {
+      console.error('Failed to fetch user chats:', error);
+    }
+  };
+
+  const handleChatPress = async (asin) => {
+    await AsyncStorage.setItem('asin', asin);
+    setModalVisible(false);
+    router.replace('/ProductAnalysis');
+  };
 
   if (!product) {
     return <Text>Loading...</Text>;
@@ -67,7 +85,7 @@ const ProductAnalysis = () => {
       <ScrollView>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.push('/urlenter')}
         >
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
@@ -82,7 +100,7 @@ const ProductAnalysis = () => {
             />
             <View style={styles.priceContainer}>
               <Text style={styles.price}>{product.price}</Text>
-              <Text style={styles.reviewCount}>{product.ratings_distribution.length} reviews</Text>
+              <Text style={styles.reviewCount}>{product.ratings_distribution.length | "not available"} reviews</Text>
             </View>
           </View>
 
@@ -123,6 +141,49 @@ const ProductAnalysis = () => {
       >
         <MaterialCommunityIcons name="chat" size={24} color="#fff" />
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.userChatsButton}
+        onPress={fetchUserChats}
+      >
+        <MaterialCommunityIcons name="history" size={24} color="#fff" />
+      </TouchableOpacity>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Previous Chats</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={userChats}
+              keyExtractor={(item) => item.product_asin_no}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={styles.chatTile}
+                  onPress={() => handleChatPress(item.product_asin_no)}
+                >
+                  <View>
+                    <Text style={styles.chatTitle}>{item.title}</Text>
+                    <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color="#666" />
+                </TouchableOpacity>
+              )}
+              style={styles.chatList}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -307,6 +368,74 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  userChatsButton: {
+    position: 'absolute',
+    left: 20,
+    bottom: 20,
+    backgroundColor: '#3498db',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    minHeight: '50%',
+    maxHeight: '80%',
+    width: '100%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2d3436',
+  },
+  closeButton: {
+    padding: 5,
+  },
+  chatList: {
+    marginTop: 10,
+  },
+  chatTile: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+  },
+  chatTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2d3436',
+    marginBottom: 4,
+  },
+  chatDate: {
+    fontSize: 14,
+    color: '#636e72',
   },
 });
 
