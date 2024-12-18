@@ -108,7 +108,6 @@ export default function URLEnter() {
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.push("/urlenter")}
           style={styles.logoContainer}
         >
           <Image

@@ -97,7 +97,7 @@ const ProductAnalysis = () => {
       <ScrollView>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.push('/urlenter')}
+          onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={30} color="#00FFEF" />
         </TouchableOpacity>
@@ -159,7 +159,7 @@ const ProductAnalysis = () => {
       </ScrollView>
       <TouchableOpacity
         style={styles.chatButton}
-        onPress={() => router.replace('/chatbot')}
+        onPress={() => router.push('/chatbot')}
       >
         <LinearGradient
           colors={['#00FFEF', '#00BFFF']}
