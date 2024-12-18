@@ -8,13 +8,14 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProduct, getUserChats } from '../apiComms';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const ProductAnalysis = () => {
   const router = useRouter();
   const [product, setProduct] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [userChats, setUserChats] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,6 +45,14 @@ const ProductAnalysis = () => {
     await AsyncStorage.setItem('asin', asin);
     setModalVisible(false);
     router.replace('/ProductAnalysis');
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((currentImageIndex + 1) % product.image_url.length);
+  };
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((currentImageIndex - 1 + product.image_url.length) % product.image_url.length);
   };
 
   if (!product) {
@@ -81,26 +90,37 @@ const ProductAnalysis = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#1a1a1a', '#000000']}
+      style={styles.container}
+    >
       <ScrollView>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => router.push('/urlenter')}
         >
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="arrow-back" size={30} color="#00FFEF" />
         </TouchableOpacity>
 
         <View style={styles.productSection}>
           <View style={styles.productInfo}>
             <Text style={styles.productName}>{product.title}</Text>
-            <Image
-              source={{ uri: product.image_url[0] }}
-              style={styles.productImage}
-              defaultSource={require('./../assets/images/image.png')}
-            />
+            <View style={styles.carouselContainer}>
+              <TouchableOpacity onPress={handlePrevImage} style={styles.carouselButton}>
+                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+              <Image
+                source={{ uri: product.image_url[currentImageIndex] }}
+                style={styles.productImage}
+                defaultSource={require('./../assets/images/image.png')}
+              />
+              <TouchableOpacity onPress={handleNextImage} style={styles.carouselButton}>
+                <Ionicons name="chevron-forward" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
             <View style={styles.priceContainer}>
+              <Text style={styles.priceLabel}>Price :</Text>
               <Text style={styles.price}>{product.price}</Text>
-              <Text style={styles.reviewCount}>{product.ratings_distribution.length | "not available"} reviews</Text>
             </View>
           </View>
 
@@ -127,9 +147,11 @@ const ProductAnalysis = () => {
             <View style={styles.sentimentsSection}>
               <Text style={styles.sentimentsTitle}>Customer Sentiments</Text>
               {product.customer_sentiments.map((sentiment, index) => (
-                <Text key={index} style={styles.sentimentText}>
-                  {sentiment.title} : <Text style={{ color: getSentimentColor(sentiment.sentiment) }}>{sentiment.sentiment}</Text>
-                </Text>
+                <View key={index} style={styles.sentimentItem}>
+                  <Text style={styles.sentimentText}>
+                    <Text style={styles.sentimentCategory}>{sentiment.title}</Text><Text style={styles.sentimentCategory}>:</Text> <Text style={{ color: getSentimentColor(sentiment.sentiment) }}>{sentiment.sentiment}</Text>
+                  </Text>
+                </View>
               ))}
             </View>
           )}
@@ -139,13 +161,23 @@ const ProductAnalysis = () => {
         style={styles.chatButton}
         onPress={() => router.replace('/chatbot')}
       >
-        <MaterialCommunityIcons name="chat" size={24} color="#fff" />
+        <LinearGradient
+          colors={['#00FFEF', '#00BFFF']}
+          style={styles.chatButtonGradient}
+        >
+          <MaterialCommunityIcons name="chat" size={24} color="#000" />
+        </LinearGradient>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.userChatsButton}
         onPress={fetchUserChats}
       >
-        <MaterialCommunityIcons name="history" size={24} color="#fff" />
+        <LinearGradient
+          colors={['#00FFEF', '#00BFFF']}
+          style={styles.chatButtonGradient}
+        >
+          <MaterialCommunityIcons name="history" size={24} color="#000" />
+        </LinearGradient>
       </TouchableOpacity>
       <Modal
         animationType="slide"
@@ -184,78 +216,66 @@ const ProductAnalysis = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e4e8',
-  },
-  brandName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2d3436',
   },
   productSection: {
     padding: 16,
+    paddingTop: height * 0.08,
   },
   productInfo: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   productName: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#2d3436',
+    color: '#00FFEF',
     marginBottom: 12,
-    textAlign:'center'
+    textAlign: 'center',
+  },
+  carouselContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  carouselButton: {
+    padding: 10,
   },
   productImage: {
-    width: '100%',
+    width: width * 0.8,
     height: width * 0.6,
     resizeMode: 'contain',
-    marginBottom: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FFFFFF',
   },
   priceContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  priceLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
   price: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2d3436',
-  },
-  reviewCount: {
-    fontSize: 16,
-    color: '#636e72',
+    color: '#FFFFFF',
   },
   summarySection: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   backButton: {
     position: 'absolute',
@@ -272,16 +292,16 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2d3436',
+    color: '#FFFFFF',
   },
   reporterBadge: {
-    backgroundColor: '#e84393',
+    backgroundColor: '#00FFEF',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   reporterText: {
-    color: '#fff',
+    color: '#000000',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -290,19 +310,14 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontSize: 16,
-    color: '#636e72',
+    color: '#FFFFFF',
     marginBottom: 8,
     lineHeight: 22,
   },
   metricsSection: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   metricContainer: {
     marginBottom: 16,
@@ -315,16 +330,16 @@ const styles = StyleSheet.create({
   metricName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2d3436',
+    color: '#FFFFFF',
   },
   metricScore: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#636e72',
+    color: '#00FFEF',
   },
   barContainer: {
     height: 8,
-    backgroundColor: '#e1e4e8',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -332,58 +347,28 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 4,
   },
-  sentimentsSection: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sentimentsTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2d3436',
-    marginBottom: 12,
-  },
-  sentimentText: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
   chatButton: {
     position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: '#6c5ce7',
     width: 60,
     height: 60,
     borderRadius: 30,
+    overflow: 'hidden',
+  },
+  chatButtonGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
   userChatsButton: {
     position: 'absolute',
     left: 20,
     bottom: 20,
-    backgroundColor: '#3498db',
     width: 60,
     height: 60,
     borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    overflow: 'hidden',
   },
   modalContainer: {
     flex: 1,
@@ -436,6 +421,33 @@ const styles = StyleSheet.create({
   chatDate: {
     fontSize: 14,
     color: '#636e72',
+  },
+  sentimentsSection: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  sentimentsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
+  sentimentItem: {
+    marginBottom: 8,
+  },
+  sentimentTitle: {
+    fontSize: 16,
+    color: '#FFFFFF',
+  },
+  sentimentText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  sentimentCategory: {
+    color: '#FFFFFF',
   },
 });
 
