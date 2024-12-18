@@ -125,7 +125,7 @@ export default function ChatBot() {
 
       <TouchableOpacity 
         style={styles.backButton}
-        onPress={() => router.replace('/ProductAnalysis')}
+        onPress={() => router.push('/ProductAnalysis')}
       >
         <Ionicons name="arrow-back" size={24} color="black " />
       </TouchableOpacity>

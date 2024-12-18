@@ -60,7 +60,7 @@ export default function URLEnter() {
   const handleChatPress = async (asin) => {
     await AsyncStorage.setItem('asin', asin);
     setModalVisible(false);
-    router.replace('/ProductAnalysis');
+    router.push('/ProductAnalysis');
   };
 
   const validateAndSubmit = () => {

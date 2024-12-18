@@ -67,7 +67,7 @@ export default function SignIn() {
       await AsyncStorage.setItem('user', JSON.stringify(response.data));
       console.log(response);
 
-      router.replace('/(tabs)/urlenter');
+      router.push('/(tabs)/urlenter');
     } catch (error) {
       if (error.code === "auth/invalid-credential") {
         alert("Invalid Credentials!");
