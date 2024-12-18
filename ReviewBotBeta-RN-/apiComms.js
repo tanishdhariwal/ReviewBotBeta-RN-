@@ -27,7 +27,7 @@ export const LoginUser = async (userData) => {
     if (response.status != 200) {
       Alert.alert("Error Invalid Credentials");
     }
-    Alert.alert("Logged in successfully");
+    // Alert.alert("Logged in successfully");
     return response;
   } catch (error) {
     Alert.alert("An error occurred. Please try again.", response.status);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { ScrollView, View, Text, Image, StyleSheet, Dimensions, TouchableOpacity, Modal, FlatList, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -99,7 +99,9 @@ const ProductAnalysis = () => {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={30} color="#00FFEF" />
+          <View style={styles.backButtonCircle}>
+            <Ionicons name="arrow-back" size={30} color="#00FFEF" />
+          </View>
         </TouchableOpacity>
 
         <View style={styles.productSection}>
@@ -193,7 +195,7 @@ const ProductAnalysis = () => {
                 style={styles.closeButton}
                 onPress={() => setModalVisible(false)}
               >
-                <Ionicons name="close" size={24} color="#666" />
+                <Ionicons name="close" size={24} color="#00FFEF" />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -208,7 +210,7 @@ const ProductAnalysis = () => {
                     <Text style={styles.chatTitle}>{item.title}</Text>
                     <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color="#666" />
+                  <Ionicons name="chevron-forward" size={20} color="#00FFEF" />
                 </TouchableOpacity>
               )}
               style={styles.chatList}
@@ -223,10 +225,11 @@ const ProductAnalysis = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: Platform.OS === 'android' ? height * 0.02 : 0, // Add top padding
   },
   productSection: {
     padding: 16,
-    paddingTop: height * 0.08,
+    paddingTop: height * 0.1, // Increased top padding to accommodate the back button
   },
   productInfo: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -279,9 +282,17 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 40,
+    top: Platform.OS === 'android' ? height * 0.05 : height * 0.03, // Adjusted for padding
     left: 20,
     zIndex: 10,
+  },
+  backButtonCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   summaryHeader: {
     flexDirection: 'row',
@@ -376,7 +387,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     minHeight: '50%',
@@ -390,12 +401,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2d3436',
+    color: '#00FFEF',
+    fontFamily: "outfit-Bold",
   },
   closeButton: {
     padding: 5,
@@ -409,18 +420,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   chatTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2d3436',
+    color: '#FFFFFF',
     marginBottom: 4,
+    fontFamily: "outfit-Regular",
   },
   chatDate: {
     fontSize: 14,
-    color: '#636e72',
+    color: '#888888',
+    fontFamily: "outfit-Regular",
   },
   sentimentsSection: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',

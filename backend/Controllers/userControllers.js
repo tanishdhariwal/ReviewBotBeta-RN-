@@ -81,6 +81,7 @@ const login = async (req, res) => {
         username: gotuser.username,
         email: gotuser.email,
         token:token,
+        profileImage: gotuser.profileImage,
       });
     } else {
 

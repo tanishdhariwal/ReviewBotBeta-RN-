@@ -12,6 +12,8 @@ import {
   Alert,
   Modal,
   FlatList,
+  ActivityIndicator,
+  Clipboard,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
@@ -31,6 +33,8 @@ export default function URLEnter() {
   const [productData, setProduct] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [userChats, setUserChats] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState("");
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -38,6 +42,7 @@ export default function URLEnter() {
         const user = await AsyncStorage.getItem("user");
         if (user !== null) {
           setUserName(JSON.parse(user).username);
+          setProfileImage(JSON.parse(user).profileImage);
         }
       } catch (error) {
         console.error("Failed to fetch user from AsyncStorage", error);
@@ -76,14 +81,13 @@ export default function URLEnter() {
   const handleNavigateToReviewChat = async () => {
     if (url !== "") {
       try {
+        setIsLoading(true);
         const validationResponse = validateAndSubmit(url);
         if (validationResponse.asin !== "false") {
-          //setIsLoading(true);
           const data = await checkURL({ asin: validationResponse.asin });
           const asin = validationResponse.asin;
           if (data.isValid) {
             await AsyncStorage.setItem("asin", asin);
-            //navigate(`/analysis`, { state: { asin: validationResponse.asin } });
             router.push("/ProductAnalysis", { asin: validationResponse.asin });
           }
         }
@@ -92,6 +96,17 @@ export default function URLEnter() {
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+
+  const handlePaste = async () => {
+    try {
+      const clipboardContent = await Clipboard.getString();
+      if (clipboardContent) {
+        setUrl(clipboardContent);
+      }
+    } catch (error) {
+      console.error('Error accessing clipboard:', error);
     }
   };
 
@@ -116,7 +131,7 @@ export default function URLEnter() {
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <ProfileDropdown userName={userName} />
+        <ProfileDropdown userName={userName} profileImage={profileImage} />
       </View>
 
       <View style={styles.content}>
@@ -142,10 +157,7 @@ export default function URLEnter() {
             />
             <TouchableOpacity
               style={styles.pasteButton}
-              onPress={async () => {
-                const clipboardContent = await Clipboard.getStringAsync();
-                setUrl(clipboardContent);
-              }}
+              onPress={handlePaste}
             >
               <Ionicons name="clipboard-outline" size={20} color="#00FFEF" />
             </TouchableOpacity>
@@ -156,6 +168,7 @@ export default function URLEnter() {
           <TouchableOpacity
             style={styles.analyzeButton}
             onPress={handleNavigateToReviewChat}
+            disabled={isLoading}
           >
             <LinearGradient
               colors={["#00FFEF", "#0057FB"]}
@@ -163,7 +176,11 @@ export default function URLEnter() {
               end={{ x: 1, y: 0 }}
               style={styles.buttonGradient}
             >
-              <Text style={styles.analyzeButtonText}>Analyze Reviews</Text>
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#000000" />
+              ) : (
+                <Text style={styles.analyzeButtonText}>Analyze Reviews</Text>
+              )}
             </LinearGradient>
           </TouchableOpacity>
 
@@ -197,7 +214,7 @@ export default function URLEnter() {
                 style={styles.closeButton}
                 onPress={() => setModalVisible(false)}
               >
-                <Ionicons name="close" size={24} color="#666" />
+                <Ionicons name="close" size={24} color="#00FFEF" />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -212,7 +229,7 @@ export default function URLEnter() {
                     <Text style={styles.chatTitle}>{item.title}</Text>
                     <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color="#666" />
+                  <Ionicons name="chevron-forward" size={20} color="#00FFEF" />
                 </TouchableOpacity>
               )}
               style={styles.chatList}
@@ -305,29 +322,30 @@ const styles = StyleSheet.create({
   },
   analyzeButton: {
     width: "100%",
-    borderRadius: 12,
+    height: 50, // Reduced from 60
+    borderRadius: 25, // Half of height
     overflow: "hidden",
   },
   buttonGradient: {
-    paddingVertical: 14,
+    flex: 1, // Changed to flex: 1
+    justifyContent: 'center', // Center content vertically
     alignItems: "center",
   },
   analyzeButtonText: {
     color: "#000000",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 16, // Reduced from 18
     fontFamily: "outfit-Bold",
   },
   userChatsButton: {
     width: "100%",
+    height: 50, // Reduced from 60
     marginTop: 16,
-    borderRadius: 12,
+    borderRadius: 25, // Half of height
     overflow: "hidden",
   },
   userChatsButtonText: {
     color: "#000000",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 16, // Reduced from 18
     fontFamily: "outfit-Bold",
   },
   modalContainer: {
@@ -336,7 +354,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     minHeight: '50%',
@@ -350,12 +368,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2d3436',
+    color: '#00FFEF',
     fontFamily: "outfit-Bold",
   },
   closeButton: {
@@ -370,19 +387,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   chatTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2d3436',
+    color: '#FFFFFF',
     marginBottom: 4,
     fontFamily: "outfit-Regular",
   },
   chatDate: {
     fontSize: 14,
-    color: '#636e72',
+    color: '#888888',
     fontFamily: "outfit-Regular",
   },
 });

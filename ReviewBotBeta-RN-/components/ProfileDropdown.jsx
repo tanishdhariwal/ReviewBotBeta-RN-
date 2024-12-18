@@ -2,43 +2,55 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import asyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function ProfileDropdown({ userName }) {
+export default function ProfileDropdown({ userName,profileImage }) {
 
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
   const handleLogout = async () => {
-    try {
-      await asyncStorage.removeItem('user');
-      Alert.alert('Logged out successfully');
-      router.replace('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+    Alert.alert(
+      "Confirm Logout",
+      "Are you sure you want to log out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Logout",
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('user');
+              router.replace('/');
+            } catch (error) {
+              console.error('Error signing out:', error);
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity 
         style={styles.profileButton} 
-        onPress={() => setIsOpen(!isOpen)}
+        onPress={() => {setIsOpen(!isOpen) }}
       >
         <Image
-          source={require('./../assets/images/icon.png')}
-          style={styles.avatar}
-        />
-        <Text style={styles.userName}>{userName}</Text>
-        <Ionicons 
-          name={isOpen ? "chevron-up" : "chevron-down"} 
-          size={20} 
-          color="#00FFEF" 
-        />
-      </TouchableOpacity>
+                  source={{ uri: profileImage }}
+                  style={styles.avatar}
+                />
+              </TouchableOpacity>
 
       {isOpen && (
         <View style={styles.dropdown}>
+          <View style={styles.userNameContainer}>
+            <Ionicons name="person-outline" size={18} color="#00FFEF" />
+            <Text style={styles.userName}>{userName}</Text>
+          </View>
           <TouchableOpacity 
             style={styles.dropdownItem}
             onPress={handleLogout}
@@ -59,8 +71,6 @@ const styles = StyleSheet.create({
 
   },
   profileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: 8,
     borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -69,13 +79,20 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    marginRight: 8,
+  },
+  userNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 4,
   },
   userName: {
     color: '#FFFFFF',
-    marginRight: 8,
     fontSize: 14,
     fontFamily: 'outfit-Regular',
+    marginLeft: 8,
   },
   dropdown: {
     position: 'absolute',

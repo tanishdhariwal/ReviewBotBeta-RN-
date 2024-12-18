@@ -257,18 +257,20 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   signUpButton: {
-    borderRadius: 12,
+    height: 50, // Reduced from 60
+    borderRadius: 25, // Half of height
     overflow: 'hidden',
     marginBottom: 20,
   },
   buttonGradient: {
-    paddingVertical: 14,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   signUpButtonText: {
     color: '#000000',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 16, // Reduced from 18
+    fontFamily: 'outfit-Bold',
   },
   signInLink: {
     alignItems: 'center',

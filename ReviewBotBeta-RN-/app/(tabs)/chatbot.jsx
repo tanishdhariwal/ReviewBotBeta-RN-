@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { getProduct, getChatResponse, get_user_chat } from '../../apiComms';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -21,7 +21,7 @@ export default function ChatBot() {
     const fetchProduct = async () => {
       try {
         let asin = await AsyncStorage.getItem('asin');
-        Alert.alert(asin);
+        // Alert.alert(asin);
         console.log(asin);
         const productData = await getProduct(asin); // Use the provided ASIN
         setProduct(productData);
@@ -63,6 +63,7 @@ export default function ChatBot() {
             { id: '1', text: "Hello! How can I assist you today?", isUser: false },
           ]);
         }
+        
       } catch (error) {
         console.error('Error fetching existing chats:', error);
         setMessages([
@@ -117,40 +118,51 @@ export default function ChatBot() {
   }, []);
 
   return (
-    <LinearGradient
-      colors={['#FFFFFF', '#FFFFFF', '#FFFFFF']}
-      style={styles.container}
-    >
-      <BlurView intensity={100} style={StyleSheet.absoluteFill} />
-
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="arrow-back" size={24} color="black " />
-      </TouchableOpacity>
-
-      <Text style={styles.title}>ChatBot</Text>
-
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
-        style={{ flex: 1, width: '100%' }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.aiBubble]}>
-              <Text style={styles.messageText}>{item.text}</Text>
-            </View>
-          )}
-          contentContainerStyle={styles.chatContainer}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-          showsVerticalScrollIndicator={false}
+        <LinearGradient
+          colors={['#1a1a1a', '#000000']}
+          style={styles.background}
         />
-
-        <View style={styles.inputContainer}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <View style={styles.backButtonCircle}>
+              <Ionicons name="arrow-back" size={30} color="#00FFEF" />
+            </View>
+          </TouchableOpacity>
+          <Animated.Text 
+            entering={FadeInDown.duration(1000).springify()}
+            style={styles.title}
+          >
+            ChatBot
+          </Animated.Text>
+        </View>
+        <Animated.View 
+          entering={FadeInUp.duration(1000).springify()}
+          style={styles.chatContainer}
+        >
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.aiBubble]}>
+                <Text style={styles.messageText}>{item.text}</Text>
+              </View>
+            )}
+            contentContainerStyle={styles.flatListContent}
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            showsVerticalScrollIndicator={false}
+          />
+        </Animated.View>
+        <Animated.View 
+          entering={FadeInUp.duration(1000).springify()}
+          style={styles.inputContainer}
+        >
           <TextInput
             style={styles.input}
             value={inputText}
@@ -159,79 +171,117 @@ export default function ChatBot() {
             placeholderTextColor="#888"
           />
           <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-            <Ionicons name="send" size={24} color="white" />
+            <LinearGradient
+              colors={['#00FFEF', '#0057FB']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.sendButtonGradient}
+            >
+              <Ionicons name="send" size={24} color="black" />
+            </LinearGradient>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#000000',
+    paddingTop: Platform.OS === 'android' ? height * 0.02 : 0, // Add padding for Android
+  },
   container: {
     flex: 1,
-    paddingTop: height * 0.05, // Adjust padding dynamically
+  },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: height,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: height * 0.02,
+    paddingBottom: height * 0.02,
   },
   backButton: {
     position: 'absolute',
-    top: height * 0.05, // Adjust dynamically based on screen height
-    left: width * 0.05, // Adjust dynamically based on screen width
+    left: width * 0.05,
     zIndex: 10,
+  },
+  backButtonCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontFamily: 'outfit-Bold',
-    fontSize: width * 0.06, // Dynamically adjust font size
-    color: 'black',
+    fontSize: width * 0.06,
+    color: '#00FFEF',
     textAlign: 'center',
-    marginBottom: height * 0.03,
   },
   chatContainer: {
-    flexGrow: 1,
-    width: width * 0.9, // Adjust width based on screen size
-    alignSelf: 'center',
+    flex: 1,
+    width: width,
+    paddingHorizontal: width * 0.05,
+  },
+  flatListContent: {
     paddingVertical: height * 0.02,
   },
   messageBubble: {
     maxWidth: '80%',
-    padding: width * 0.03, // Adjust padding dynamically
-    borderRadius: width * 0.05, // Adjust radius dynamically
+    padding: width * 0.03,
+    borderRadius: width * 0.05,
     marginVertical: height * 0.01,
   },
   userBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(0, 123, 255, 0.2)',
   },
   aiBubble: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgb(0, 156, 176)',
   },
   messageText: {
-    color: 'black',
+    color: '#FFFFFF',
     fontFamily: 'outfit-Regular',
-    fontSize: width * 0.04, // Adjust font size dynamically
+    fontSize: width * 0.04,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: width * 0.9, // Adjust width dynamically
-    alignSelf: 'center',
-    marginBottom: height * 0.02, // Avoid overlap
+    width: width,
+    paddingHorizontal: width * 0.05,
+    paddingVertical: height * 0.01,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   input: {
     flex: 1,
-    height: height * 0.07, // Adjust height dynamically
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: height * 0.035, // Adjust radius dynamically
-    paddingHorizontal: width * 0.05,
-    color: 'black',
+    height: height * 0.06,
+    color: '#FFFFFF',
     fontFamily: 'outfit-Regular',
     marginRight: width * 0.02,
+    fontSize: width * 0.04,
+    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+    borderRadius: height * 0.03,
+    paddingHorizontal: width * 0.03,
   },
   sendButton: {
-    width: height * 0.07,
-    height: height * 0.07,
-    backgroundColor: 'rgba(0, 122, 255, 0.8)',
-    borderRadius: height * 0.035,
+    width: height * 0.06,
+    height: height * 0.06,
+    borderRadius: height * 0.03,
+    overflow: 'hidden',
+  },
+  sendButtonGradient: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
