@@ -1,22 +1,31 @@
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import GetStarted from '../components/GetStarted'
-
-
+import GetStarted from '../components/GetStarted';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
 export default function Index() {
-  // ...existing code...
+  const [user, setUser] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Adjust authentication logic as needed
-  // For example, check if the user is logged in using custom auth
-  // const user = await checkAuthStatus(); // Ensure this function is adjusted for React Native
+  useEffect(() => {
+    const checkUser = async () => {
+      const storedUser = await AsyncStorage.getItem('user');
+      setUser(storedUser);
+      if (storedUser) {
+        router.push('/(tabs)/urlenter');
+      }
+    };
+    checkUser();
+  }, []);
 
   return (
     <View 
       style={{
         flex: 1
-        // ...existing code...
       }}
     >
-      <GetStarted/>
+      <GetStarted />
     </View>
   );
 }
