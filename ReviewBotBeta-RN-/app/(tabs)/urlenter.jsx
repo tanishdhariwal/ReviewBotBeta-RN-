@@ -22,6 +22,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ProfileDropdown from "./../../components/ProfileDropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { checkURL, getUserChats } from "../../apiComms";
+import { BackHandler } from 'react-native';
 
 const { width, height } = Dimensions.get("window");
 
@@ -35,6 +36,28 @@ export default function URLEnter() {
   const [userChats, setUserChats] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState("");
+
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert(
+        "Exit",
+        "Are you sure you want to exit the app?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "OK", onPress: () => BackHandler.exitApp() }
+        ],
+        { cancelable: false }
+      );
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     const fetchUserName = async () => {

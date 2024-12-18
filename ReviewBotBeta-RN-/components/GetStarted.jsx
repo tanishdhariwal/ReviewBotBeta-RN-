@@ -95,7 +95,7 @@ export default function GetStarted() {
         >
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push('auth/Sign-in')}
+            onPress={() => router.replace('auth/Sign-in')}
           >
             <LinearGradient
               colors={['#00FFEF', '#0057FB']}

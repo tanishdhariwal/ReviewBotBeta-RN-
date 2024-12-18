@@ -40,6 +40,13 @@ export default function SignIn() {
   const formOpacity = useSharedValue(0);
   const formTranslateY = useSharedValue(50);
 
+  useEffect(async () => {
+    const user = await AsyncStorage.getItem('user');
+    if (user) {
+      router.push('/(tabs)/urlenter');
+    }
+  }, []);
+
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
     formOpacity.value = withSpring(1);
