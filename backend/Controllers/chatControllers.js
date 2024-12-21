@@ -13,7 +13,7 @@ const generateChatResponse = async (req, res) => {
     const userChat = await Chat.findOne({ user_id: userId, product_asin: productASIN });
     const exchanges = userChat ? userChat.exchanges : [];
     const llmResponse = await axios.post(
-      "http://localhost:8000/get_LLM_response",
+      `http://${process.env.FRONTEND_URL}:8000/get_LLM_response`,
       { asin: productASIN, query: currentMessage, exchanges: exchanges }
     );
     const botResponse = llmResponse.data.response;
