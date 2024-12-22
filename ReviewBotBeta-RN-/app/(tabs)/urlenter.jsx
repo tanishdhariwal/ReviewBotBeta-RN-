@@ -10,6 +10,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Modal,
+  FlatList,
+  ActivityIndicator,
+  Clipboard,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
@@ -17,9 +21,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import ProfileDropdown from "./../../components/ProfileDropdown";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { checkURL, getProduct } from "../../apiComms";
-import * as Clipboard from "expo-clipboard";
-
+import { checkURL, getUserChats, deleteUserChat } from "../../apiComms";
+import { BackHandler } from 'react-native';
 
 const { width, height } = Dimensions.get("window");
 
@@ -61,6 +64,7 @@ export default function URLEnter() {
         const user = await AsyncStorage.getItem("user");
         if (user !== null) {
           setUserName(JSON.parse(user).username);
+          setProfileImage(JSON.parse(user).profileImage);
         }
       } catch (error) {
         console.error("Failed to fetch user from AsyncStorage", error);
@@ -69,19 +73,32 @@ export default function URLEnter() {
 
     fetchUserName();
   }, []);
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        let asin = await AsyncStorage.getItem('asin');
-        const productData = await getProduct(asin); // Use the provided ASIN
-        setProduct(productData);
-      } catch (error) {
-        console.error('Failed to fetch product details:', error);
-      }
-    };
 
-    fetchProduct();
-  }, []);
+  const fetchUserChats = async () => {
+    try {
+      const response = await getUserChats();
+      setUserChats(response);
+      setModalVisible(true);
+    } catch (error) {
+      console.error('Failed to fetch user chats:', error);
+    }
+  };
+
+  const handleChatPress = async (asin) => {
+    await AsyncStorage.setItem('asin', asin);
+    setModalVisible(false);
+    router.push('/ProductAnalysis');
+  };
+
+  const handleDeleteChat = async (asin) => {
+    try {
+      await deleteUserChat(asin);
+      setUserChats(userChats.filter(chat => chat.product_asin_no !== asin));
+    } catch (error) {
+      console.error('Failed to delete chat:', error);
+    }
+  };
+
   const validateAndSubmit = () => {
     if (!url) {
       setError("Please enter a URL");
@@ -95,13 +112,13 @@ export default function URLEnter() {
   const handleNavigateToReviewChat = async () => {
     if (url !== "") {
       try {
+        setIsLoading(true);
         const validationResponse = validateAndSubmit(url);
         if (validationResponse.asin !== "false") {
-          //setIsLoading(true);
           const data = await checkURL({ asin: validationResponse.asin });
+          const asin = validationResponse.asin;
           if (data.isValid) {
-            AsyncStorage.setItem("asin", validationResponse.asin);
-            //navigate(`/analysis`, { state: { asin: validationResponse.asin } });
+            await AsyncStorage.setItem("asin", asin);
             router.push("/ProductAnalysis", { asin: validationResponse.asin });
           }
         }
@@ -110,6 +127,17 @@ export default function URLEnter() {
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+
+  const handlePaste = async () => {
+    try {
+      const clipboardContent = await Clipboard.getString();
+      if (clipboardContent) {
+        setUrl(clipboardContent);
+      }
+    } catch (error) {
+      console.error('Error accessing clipboard:', error);
     }
   };
 
@@ -126,7 +154,6 @@ export default function URLEnter() {
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.push("/urlenter")}
           style={styles.logoContainer}
         >
           <Image
@@ -135,7 +162,7 @@ export default function URLEnter() {
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <ProfileDropdown userName={userName} />
+        <ProfileDropdown userName={userName} profileImage={profileImage} />
       </View>
 
       <View style={styles.content}>
@@ -161,10 +188,7 @@ export default function URLEnter() {
             />
             <TouchableOpacity
               style={styles.pasteButton}
-              onPress={async () => {
-                const clipboardContent = await Clipboard.getStringAsync();
-                setUrl(clipboardContent);
-              }}
+              onPress={handlePaste}
             >
               <Ionicons name="clipboard-outline" size={20} color="#00FFEF" />
             </TouchableOpacity>
@@ -175,6 +199,7 @@ export default function URLEnter() {
           <TouchableOpacity
             style={styles.analyzeButton}
             onPress={handleNavigateToReviewChat}
+            disabled={isLoading}
           >
             <LinearGradient
               colors={["#00FFEF", "#0057FB"]}
@@ -182,11 +207,75 @@ export default function URLEnter() {
               end={{ x: 1, y: 0 }}
               style={styles.buttonGradient}
             >
-              <Text style={styles.analyzeButtonText}>Analyze Reviews</Text>
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#000000" />
+              ) : (
+                <Text style={styles.analyzeButtonText}>Analyze Reviews</Text>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.userChatsButton}
+            onPress={fetchUserChats}
+          >
+            <LinearGradient
+              colors={["#00FFEF", "#0057FB"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.buttonGradient}
+            >
+              <Text style={styles.userChatsButtonText}>View Previous Chats</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Previous Chats</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Ionicons name="close" size={24} color="#00FFEF" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={userChats}
+              keyExtractor={(item) => item.product_asin_no}
+              renderItem={({ item }) => (
+                <View style={styles.chatTile}>
+                  <TouchableOpacity 
+                    style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+                    onPress={() => handleChatPress(item.product_asin_no)}
+                  >
+                    <View>
+                      <Text style={styles.chatTitle}>{item.title}</Text>
+                      <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="#00FFEF" />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={{ padding: 10 }}
+                    onPress={() => handleDeleteChat(item.product_asin_no)}
+                  >
+                    <Ionicons name="trash" size={20} color="red" />
+                  </TouchableOpacity>
+                </View>
+              )}
+              style={styles.chatList}
+            />
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -272,17 +361,83 @@ const styles = StyleSheet.create({
   },
   analyzeButton: {
     width: "100%",
-    borderRadius: 12,
+    height: 50, // Reduced from 60
+    borderRadius: 25, // Half of height
     overflow: "hidden",
   },
   buttonGradient: {
-    paddingVertical: 14,
+    flex: 1, // Changed to flex: 1
+    justifyContent: 'center', // Center content vertically
     alignItems: "center",
   },
   analyzeButtonText: {
     color: "#000000",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 16, // Reduced from 18
     fontFamily: "outfit-Bold",
+  },
+  userChatsButton: {
+    width: "100%",
+    height: 50, // Reduced from 60
+    marginTop: 16,
+    borderRadius: 25, // Half of height
+    overflow: "hidden",
+  },
+  userChatsButtonText: {
+    color: "#000000",
+    fontSize: 16, // Reduced from 18
+    fontFamily: "outfit-Bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#1a1a1a',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    minHeight: '50%',
+    maxHeight: '80%',
+    width: '100%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  modalTitle: {
+    fontSize: 22,
+    color: '#00FFEF',
+    fontFamily: "outfit-Bold",
+  },
+  closeButton: {
+    padding: 5,
+  },
+  chatList: {
+    marginTop: 10,
+  },
+  chatTile: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  chatTitle: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    marginBottom: 4,
+    fontFamily: "outfit-Regular",
+  },
+  chatDate: {
+    fontSize: 14,
+    color: '#888888',
+    fontFamily: "outfit-Regular",
   },
 });
