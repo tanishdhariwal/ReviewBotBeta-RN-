@@ -14,7 +14,7 @@ import time
 from app.Helpers.scrapeAndStore import scrape_data
 from urllib.parse import urlparse, parse_qs
 import re
-from app.Model.LlamaModel import answer_query, summarise_text
+from app.Model.APIModel import answer_query, summarise_text
 
 
 load_dotenv()
