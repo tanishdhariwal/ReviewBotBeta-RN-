@@ -55,7 +55,6 @@ export default function URLEnter() {
       "hardwareBackPress",
       backAction
     );
-
     return () => backHandler.remove();
   }, []);
 
