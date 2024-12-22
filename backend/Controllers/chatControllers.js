@@ -149,7 +149,23 @@ const getProduct = async (req, res) => {
   }
 };
 
+const deleteUserChat = async (req, res) => {
+  const userId = res.locals.jwtData.id;
+  const { asin } = req.params;
+  try {
+    const result = await Chat.deleteOne({ user_id: userId, product_asin: asin });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Chat not found.' });
+    }
+    res.status(200).json({ message: 'Chat deleted successfully.' });
+  } catch (error) {
+    console.error('Error in deleteUserChat:', error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
 module.exports = {
+  deleteUserChat,
   generateChatResponse,
   productUrlCheck,
   scrapeURL,

@@ -1,0 +1,28 @@
+# Node modules and other dependencies
+node_modules
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Git repository files
+.git
+
+# Log files
+*.log
+
+# Documentation files
+*.md
+
+# Large directories or files that are not needed in the image
+HuggingFaceModels
+old_Scraper
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/

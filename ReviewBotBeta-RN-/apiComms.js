@@ -132,3 +132,17 @@ export const getUserChats = async () => {
     throw error;
   }
 };
+
+export const deleteUserChat = async (asin) => {
+  try {
+    const userjson = await AsyncStorage.getItem("user");
+    const user = JSON.parse(userjson);
+    console.log(user.token);
+    const response = await axios.delete(`/delete_user_chat/${asin}`, { headers: { "device-type": "Mobile", "Content-Type": "application/json", "authorization" : user.token }});
+    Alert.alert("Chat deleted successfully");
+    return response.data;
+  } catch (error) {
+    Alert.alert("Failed to delete chat.");
+    throw error;
+  }
+};

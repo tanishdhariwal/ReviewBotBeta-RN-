@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getProduct, getUserChats } from '../apiComms';
+import { getProduct, getUserChats, deleteUserChat } from '../apiComms';
 
 const { width, height } = Dimensions.get('window');
 
@@ -45,6 +45,15 @@ const ProductAnalysis = () => {
     await AsyncStorage.setItem('asin', asin);
     setModalVisible(false);
     router.replace('/ProductAnalysis');
+  };
+
+  const handleDeleteChat = async (asin) => {
+    try {
+      await deleteUserChat(asin);
+      setUserChats(userChats.filter(chat => chat.product_asin_no !== asin));
+    } catch (error) {
+      console.error('Failed to delete chat:', error);
+    }
   };
 
   const handleNextImage = () => {
@@ -202,16 +211,24 @@ const ProductAnalysis = () => {
               data={userChats}
               keyExtractor={(item) => item.product_asin_no}
               renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={styles.chatTile}
-                  onPress={() => handleChatPress(item.product_asin_no)}
-                >
-                  <View>
-                    <Text style={styles.chatTitle}>{item.title}</Text>
-                    <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color="#00FFEF" />
-                </TouchableOpacity>
+                <View style={styles.chatTile}>
+                  <TouchableOpacity 
+                    style={styles.chatTileContent}
+                    onPress={() => handleChatPress(item.product_asin_no)}
+                  >
+                    <View>
+                      <Text style={styles.chatTitle}>{item.title}</Text>
+                      <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="#00FFEF" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteChat(item.product_asin_no)}
+                  >
+                    <Ionicons name="trash" size={20} color="red" />
+                  </TouchableOpacity>
+                </View>
               )}
               style={styles.chatList}
             />
@@ -422,6 +439,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  chatTileContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  deleteButton: {
+    padding: 10,
   },
   chatTitle: {
     fontSize: 16,
