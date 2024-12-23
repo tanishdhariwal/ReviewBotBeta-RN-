@@ -9,11 +9,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from jose import JWTError, jwt
 import os
 from dotenv import load_dotenv
-from tqdm import tqdm
-import time
 from app.Helpers.scrapeAndStore import scrape_data
-from urllib.parse import urlparse, parse_qs
-import re
 from app.Model.APIModel import answer_query, summarise_text
 
 
