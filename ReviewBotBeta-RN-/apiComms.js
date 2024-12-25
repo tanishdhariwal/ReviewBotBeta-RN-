@@ -64,11 +64,11 @@ export const checkURL = async (asinData) => {
       headers: { "device-type": "Mobile", "Content-Type": "application/json", "authorization" : AsyncStorage.getItem("user") },
     });
     if (!response.data.isValid) {
-      toast.error("Unable to help right now");
+      Alert.alert("Unable to help right now");
     }
     return response.data;
   } catch (error) {
-    toast.error(error.response?.data?.error || "Validation failed.");
+    Alert.alert(error.response?.data?.error || "Validation failed.");
     throw error;
   }
 };
