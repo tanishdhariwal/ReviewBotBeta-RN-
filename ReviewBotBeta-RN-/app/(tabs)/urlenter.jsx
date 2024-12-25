@@ -36,6 +36,7 @@ export default function URLEnter() {
   const [userChats, setUserChats] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState("");
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const backAction = () => {
@@ -55,7 +56,10 @@ export default function URLEnter() {
       "hardwareBackPress",
       backAction
     );
-    return () => backHandler.remove();
+
+    return () => {
+      backHandler.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -73,6 +77,7 @@ export default function URLEnter() {
 
     fetchUserName();
   }, []);
+
 
   const fetchUserChats = async () => {
     try {
@@ -143,7 +148,7 @@ export default function URLEnter() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios"||"android" ? "padding" : "height"}
       style={styles.container}
     >
       <StatusBar style="light" />
@@ -440,5 +445,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888888',
     fontFamily: "outfit-Regular",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000',
   },
 });

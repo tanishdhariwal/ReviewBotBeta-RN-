@@ -3,14 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from app.Controllers.routes import router
 from contextlib import asynccontextmanager
-#from app.Model.LlamaModel import load_model
+from app.Model.LlamaModel import load_model
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # pass
-   # load_model()
+    load_model()
     yield
-    # unload_model_and_tokenizer()
+    #unload_model_and_tokenizer()
 
 app = FastAPI(lifespan=lifespan)
 
