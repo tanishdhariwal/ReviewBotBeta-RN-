@@ -204,6 +204,7 @@ export default function SignIn() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000000',
   },
   background: {
     position: 'absolute',

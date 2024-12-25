@@ -143,7 +143,7 @@ export default function URLEnter() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "android" || "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <StatusBar style="light" />
@@ -169,8 +169,8 @@ export default function URLEnter() {
         <View style={styles.card}>
           <Text style={styles.title}>Enter Product URL</Text>
           <Text style={styles.subtitle}>
-            Paste an Amazon.com product URL to start analyzing reviews{" "}
-            {userName}
+            {"Revolutionize Product Understanding Through AI-Driven Review Analysis"}
+          
           </Text>
 
           <View style={styles.inputContainer}>
@@ -261,13 +261,12 @@ export default function URLEnter() {
                       <Text style={styles.chatTitle}>{item.title}</Text>
                       <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#00FFEF" />
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={{ padding: 10 }}
                     onPress={() => handleDeleteChat(item.product_asin_no)}
                   >
-                    <Ionicons name="trash" size={20} color="red" />
+                    <Ionicons name="trash" size={20} color="cyan" />
                   </TouchableOpacity>
                 </View>
               )}
@@ -283,6 +282,7 @@ export default function URLEnter() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000000', // Ensure the background color is set
   },
   background: {
     position: "absolute",
@@ -400,6 +400,7 @@ const styles = StyleSheet.create({
     maxHeight: '80%',
     width: '100%',
     paddingBottom: 20,
+    paddingHorizontal: 20, // Added paddingHorizontal to avoid white space
   },
   modalHeader: {
     flexDirection: 'row',

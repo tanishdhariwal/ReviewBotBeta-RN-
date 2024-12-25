@@ -220,13 +220,12 @@ const ProductAnalysis = () => {
                       <Text style={styles.chatTitle}>{item.title}</Text>
                       <Text style={styles.chatDate}>{new Date(item.created_at).toLocaleDateString()}</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#00FFEF" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.deleteButton}
                     onPress={() => handleDeleteChat(item.product_asin_no)}
                   >
-                    <Ionicons name="trash" size={20} color="red" />
+                    <Ionicons name="trash" size={20} color="cyan" />
                   </TouchableOpacity>
                 </View>
               )}
