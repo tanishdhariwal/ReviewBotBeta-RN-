@@ -188,7 +188,7 @@ export default function SignIn() {
 
             <TouchableOpacity 
               style={styles.createAccount}
-              onPress={() => router.replace('/auth/Sign-up')}
+              onPress={() => router.push('/auth/Sign-up')} // Changed from router.replace to router.push
             >
               <Text style={styles.createAccountText}>
                 Don't have an account? <Text style={styles.createAccountTextBold}>Sign Up</Text>
@@ -204,6 +204,7 @@ export default function SignIn() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000000',
   },
   background: {
     position: 'absolute',
