@@ -61,7 +61,7 @@ export const SignUpUser = async (userData) => {
 export const checkURL = async (asinData) => {
   try {
     const response = await axios.post(`/product_url_validation`, asinData, {
-      headers: { "device-type": "Mobile", "Content-Type": "application/json", "authorization" : AsyncStorage.getItem("token") },
+      headers: { "device-type": "Mobile", "Content-Type": "application/json", "authorization" : AsyncStorage.getItem("user") },
     });
     if (!response.data.isValid) {
       toast.error("Unable to help right now");
