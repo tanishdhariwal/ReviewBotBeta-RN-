@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard, SafeAreaView, Clipboard } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { getProduct, getChatResponse, get_user_chat } from '../../apiComms';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TypingAnimation } from 'react-native-typing-animation'; // Ensure correct import
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,6 +17,7 @@ export default function ChatBot() {
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef(null);
   const [product, setProduct] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -36,6 +38,7 @@ export default function ChatBot() {
   useEffect(() => {
     const fetchExistingChats = async () => {
       try {
+        console.log("checking")
         const asin = await AsyncStorage.getItem('asin');
         const data = await get_user_chat({ product_asin: asin });
         if (data && data.exchanges && data.exchanges.length > 0) {
@@ -87,6 +90,7 @@ export default function ChatBot() {
     setMessages(prevMessages => [...prevMessages, newUserMessage]);
     setInputText('');
     setIsLoading(true);
+    setIsTyping(true);
 
     try {
       const asin = await AsyncStorage.getItem('asin');
@@ -101,7 +105,12 @@ export default function ChatBot() {
       console.error('Error fetching AI response:', error);
     } finally {
       setIsLoading(false);
+      setIsTyping(false);
     }
+  };
+
+  const copyToClipboard = async (text) => {
+    await Clipboard.setString(text);
   };
 
   useEffect(() => {
@@ -116,6 +125,22 @@ export default function ChatBot() {
       keyboardDidShowListener.remove();
     };
   }, []);
+
+  const renderItem = ({ item }) => (
+    <View>
+      {!item.isUser && (
+        <TouchableOpacity 
+          style={[styles.copyButton, { alignSelf: 'flex-start' }]}
+          onPress={() => copyToClipboard(item.text)}
+        >
+          <Ionicons name="copy-outline" size={20} color="#00FFEF" />
+        </TouchableOpacity>
+      )}
+      <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.aiBubble]}>
+        <Text style={styles.messageText}>{item.text}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -149,15 +174,24 @@ export default function ChatBot() {
             ref={flatListRef}
             data={messages}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.aiBubble]}>
-                <Text style={styles.messageText}>{item.text}</Text>
-              </View>
-            )}
+            renderItem={renderItem}
             contentContainerStyle={styles.flatListContent}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             showsVerticalScrollIndicator={false}
           />
+          {isTyping && (
+            <View style={styles.typingIndicatorContainer}>
+              <TypingAnimation 
+                dotColor="#00FFEF" 
+                dotMargin={5} 
+                dotAmplitude={3} 
+                dotSpeed={0.15} 
+                dotRadius={3} 
+                dotX={12} 
+                dotY={6} 
+              />
+            </View>
+          )}
         </Animated.View>
         <Animated.View 
           entering={FadeInUp.duration(1000).springify()}
@@ -284,5 +318,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  typingIndicatorContainer: {
+    padding: 10,
+    marginLeft: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgb(0, 156, 176)',
+    borderRadius: 20,
+    marginBottom: 10,
+  },
+  typingIndicatorText: {
+    color: '#888',
+    fontFamily: 'outfit-Regular',
+    fontSize: width * 0.04,
+  },
+  copyButton: {
+    padding: 5,
+    marginBottom: 2,
+    marginLeft: 5,
+    backgroundColor: 'rgba(0, 156, 176, 0.3)',
+    borderRadius: 15,
   },
 });
