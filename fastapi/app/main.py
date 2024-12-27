@@ -7,8 +7,8 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # pass
-    #load_model()
+    #pass
+    load_model()
     yield
     #unload_model_and_tokenizer()
 

@@ -10,7 +10,7 @@ from jose import JWTError, jwt
 import os
 from dotenv import load_dotenv
 from app.Helpers.scrapeAndStore import scrape_data
-from app.Model.APIModel import answer_query, summarise_text
+from app.Model.LlamaModel import answer_query, summarise_text
 
 
 load_dotenv()
