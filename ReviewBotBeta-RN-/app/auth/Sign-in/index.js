@@ -40,11 +40,14 @@ export default function SignIn() {
   const formOpacity = useSharedValue(0);
   const formTranslateY = useSharedValue(50);
 
-  useEffect(async () => {
-    const user = await AsyncStorage.getItem('user');
-    if (user) {
-      router.push('/(tabs)/urlenter');
+  useEffect(() => {
+    async function checkUser() {
+      const user = await AsyncStorage.getItem('user');
+      if (user) {
+        router.push('/(tabs)/urlenter');
+      }
     }
+    checkUser();
   }, []);
 
   useEffect(() => {
@@ -84,21 +87,7 @@ export default function SignIn() {
     }
   };
 
-  const onForgotPassword = async () => {
-    if (!email) {
-      Alert.alert("Please enter your email address");
-      return;
-    }
-    try {
-      // Implement forgot password logic using custom auth
-      // For example, if you have a function sendPasswordResetEmail in your custom auth
-      await sendPasswordResetEmail(email); // Make sure to define this function in your custom auth
-      Alert.alert("Password reset email sent!");
-    } catch (error) {
-      console.log(error.message);
-      Alert.alert("An error occurred. Please try again.");
-    }
-  };
+
 
   return (
     <KeyboardAvoidingView
@@ -167,9 +156,6 @@ export default function SignIn() {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.forgotPassword} onPress={onForgotPassword}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.signInButton}
@@ -187,7 +173,7 @@ export default function SignIn() {
 
             <TouchableOpacity 
               style={styles.createAccount}
-              onPress={() => router.push('/auth/Sign-up')} // Changed from router.replace to router.push
+              onPress={() => router.replace('/auth/Sign-up')} // Changed from router.replace to router.push
             >
               <Text style={styles.createAccountText}>
                 Don't have an account? <Text style={styles.createAccountTextBold}>Sign Up</Text>

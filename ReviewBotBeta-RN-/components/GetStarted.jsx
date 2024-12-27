@@ -95,7 +95,7 @@ export default function GetStarted() {
         >
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.replace('auth/Sign-in')}
+            onPress={() => router.push('auth/Sign-in')}  // Changed from replace to push
           >
             <LinearGradient
               colors={['#00FFEF', '#0057FB']}
@@ -133,6 +133,7 @@ export default function GetStarted() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000000',
   },
   background: {
     position: 'absolute',

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard, SafeAreaView, Clipboard } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Dimensions, KeyboardAvoidingView, Platform, Keyboard, SafeAreaView, Clipboard, BackHandler } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -7,6 +7,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { getProduct, getChatResponse, get_user_chat } from '../../apiComms';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TypingAnimation } from 'react-native-typing-animation'; // Ensure correct import
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,23 +21,21 @@ export default function ChatBot() {
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    async function checkUserSession() {
       try {
         let asin = await AsyncStorage.getItem('asin');
-        // Alert.alert(asin);
         console.log(asin);
-        const productData = await getProduct(asin); // Use the provided ASIN
+        const productData = await getProduct(asin);
         setProduct(productData);
       } catch (error) {
         console.error('Failed to fetch product details:', error);
       }
-    };
-
-    fetchProduct();
+    }
+    checkUserSession();
   }, []);
 
   useEffect(() => {
-    const fetchExistingChats = async () => {
+    async function fetchChats() {
       try {
         console.log("checking")
         const asin = await AsyncStorage.getItem('asin');
@@ -66,17 +65,29 @@ export default function ChatBot() {
             { id: '1', text: "Hello! How can I assist you today?", isUser: false },
           ]);
         }
-        
       } catch (error) {
         console.error('Error fetching existing chats:', error);
         setMessages([
           { id: '1', text: "Hello! How can I assist you today?", isUser: false },
         ]);
       }
+    }
+    fetchChats();
+  }, [product]);
+
+  useEffect(() => {
+    const backAction = () => {
+      router.back();
+      return true;
     };
 
-    fetchExistingChats();
-  }, [product]);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [router]);
 
   const sendMessage = async () => {
     if (inputText.trim() === '') return;
@@ -127,18 +138,47 @@ export default function ChatBot() {
   }, []);
 
   const renderItem = ({ item }) => (
-    <View>
-      {!item.isUser && (
-        <TouchableOpacity 
-          style={[styles.copyButton, { alignSelf: 'flex-start' }]}
-          onPress={() => copyToClipboard(item.text)}
+    <View 
+      style={[
+        styles.messageContainer, 
+        item.isUser ? styles.userMessageContainer : styles.aiMessageContainer
+      ]}
+    >
+      <View 
+        style={[
+          styles.messageRow, 
+          item.isUser ? styles.userMessageRow : styles.aiMessageRow
+        ]}
+      >
+        {!item.isUser && (
+          <View style={styles.profileIcon}>
+            <MaterialCommunityIcons name="robot" size={24} color="#00FFEF" />
+          </View>
+        )}
+        <View 
+          style={[
+            styles.messageBubble, 
+            item.isUser ? styles.userBubble : styles.aiBubble
+          ]}
         >
-          <Ionicons name="copy-outline" size={20} color="#00FFEF" />
-        </TouchableOpacity>
-      )}
-      <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.aiBubble]}>
-        <Text style={styles.messageText}>{item.text}</Text>
+          <Text style={styles.messageText}>{item.text}</Text>
+        </View>
+        {item.isUser && (
+          <View style={styles.profileIcon}>
+            <MaterialCommunityIcons name="account-circle" size={24} color="#00FFEF" />
+          </View>
+        )}
       </View>
+      {!item.isUser && (
+        <View style={styles.copySection}>
+          <TouchableOpacity 
+            style={styles.copyButton}
+            onPress={() => copyToClipboard(item.text)}
+          >
+            <Ionicons name="copy-outline" size={24} color="#00FFEF" />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 
@@ -154,11 +194,6 @@ export default function ChatBot() {
           style={styles.background}
         />
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <View style={styles.backButtonCircle}>
-              <Ionicons name="arrow-back" size={30} color="#00FFEF" />
-            </View>
-          </TouchableOpacity>
           <Animated.Text 
             entering={FadeInDown.duration(1000).springify()}
             style={styles.title}
@@ -186,7 +221,7 @@ export default function ChatBot() {
                 dotMargin={5} 
                 dotAmplitude={3} 
                 dotSpeed={0.15} 
-                dotRadius={3} 
+                //dotRadius={3} 
                 dotX={12} 
                 dotY={6} 
               />
@@ -224,7 +259,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#000000',
-    paddingTop: Platform.OS === 'android' ? height * 0.02 : 0, // Add padding for Android
+    //paddingTop: Platform.OS === 'android' ? height * 0.02 : 0, // Add padding for Android
   },
   container: {
     flex: 1,
@@ -265,24 +300,59 @@ const styles = StyleSheet.create({
   chatContainer: {
     flex: 1,
     width: width,
-    paddingHorizontal: width * 0.05,
+    paddingHorizontal: 0, // Remove horizontal padding
   },
   flatListContent: {
     paddingVertical: height * 0.02,
+    paddingHorizontal: width * 0.02, // Add some horizontal padding to the list
+  },
+  messageContainer: {
+    marginVertical: 4,
+    width: '100%',
+  },
+  userMessageContainer: {
+    alignItems: 'flex-end',
+    paddingLeft: '15%', // Give space on the left for user messages
+  },
+  aiMessageContainer: {
+    alignItems: 'flex-start',
+    paddingRight: '15%', // Give space on the right for AI messages
+  },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  userMessageRow: {
+    justifyContent: 'flex-end',
+  },
+  aiMessageRow: {
+    justifyContent: 'flex-start',
   },
   messageBubble: {
     maxWidth: '80%',
-    padding: width * 0.03,
-    borderRadius: width * 0.05,
-    marginVertical: height * 0.01,
+    padding: 12,
+    borderRadius: 16,
+    marginHorizontal: 8,
   },
   userBubble: {
-    alignSelf: 'flex-end',
     backgroundColor: 'rgba(0, 123, 255, 0.2)',
+    borderBottomRightRadius: 4, // Sharper corner for user messages
   },
   aiBubble: {
-    alignSelf: 'flex-start',
     backgroundColor: 'rgb(0, 156, 176)',
+    borderBottomLeftRadius: 4,
+    padding : 10,
+    paddingRight: 35, // Increase right padding for AI messages
+     // Sharper corner for AI messages
+  },
+  profileIcon: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 156, 176, 0.2)',
+    borderRadius: 16,
+    marginHorizontal: 4,
   },
   messageText: {
     color: '#FFFFFF',
@@ -324,19 +394,18 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     alignSelf: 'flex-start',
     backgroundColor: 'rgb(0, 156, 176)',
-    borderRadius: 20,
-    marginBottom: 10,
-  },
-  typingIndicatorText: {
-    color: '#888',
+    borderRadius: 20,    marginBottom: 10,  },  typingIndicatorText: {    color: '#888',
     fontFamily: 'outfit-Regular',
     fontSize: width * 0.04,
   },
+  copySection: {
+    alignSelf: 'flex-end',
+    marginRight: '5%',
+    marginTop: 2,
+  },
   copyButton: {
-    padding: 5,
-    marginBottom: 2,
-    marginLeft: 5,
-    backgroundColor: 'rgba(0, 156, 176, 0.3)',
-    borderRadius: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+    padding: 10,
+    borderRadius: 12,
   },
 });

@@ -166,7 +166,7 @@ const SignUp = () => {
 
             <TouchableOpacity 
               style={styles.signInLink}
-              onPress={() => router.replace('auth/Sign-in')}
+              onPress={() => router.push('auth/Sign-in')}
             >
               <Text style={styles.signInLinkText}>
                 Already have an account? <Text style={styles.signInLinkTextBold}>Sign In</Text>

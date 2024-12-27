@@ -104,14 +104,6 @@ const ProductAnalysis = () => {
       style={styles.container}
     >
       <ScrollView>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <View style={styles.backButtonCircle}>
-            <Ionicons name="arrow-back" size={30} color="#00FFEF" />
-          </View>
-        </TouchableOpacity>
 
         <View style={styles.productSection}>
           <View style={styles.productInfo}>

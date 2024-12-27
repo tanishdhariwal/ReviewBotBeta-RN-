@@ -22,7 +22,7 @@ export default function Index() {
   return (
     <View 
       style={{
-        flex: 1
+        flex: 1,
       }}
     >
       <GetStarted />
