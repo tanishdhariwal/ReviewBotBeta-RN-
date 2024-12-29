@@ -51,6 +51,14 @@ The ReviewBot project is organized into three main sections:
 
 ---
 
+### Clone the Repository
+
+```bash
+git clone https://github.com/tanishdhariwal/ReviewBotBeta-RN-.git
+cd ReviewBotBeta-RN
+```
+
+---
 ## Directory Structure
 
 This directory structure provides an overview of the organization within each section of the project.
@@ -92,3 +100,97 @@ backend/
 ├── package.json          # Project metadata and dependencies
 
 ```
+
+### Frontend
+
+The frontend of this project is designed using React Native with Expo, adhering to a modular structure for easy scalability and maintainability. Below is the directory structure with a description of each folder and file:
+```plaintext
+frontend/
+├── app/                 # Main application folder containing screens and layouts
+│   ├── (tabs)/             # Tabs for navigation
+│   │   ├── chatbot.jsx         # Chatbot tab
+│   │   └── urltener.jsx        # URL analysis tab
+│   ├── auth/              # Authentication screens
+│   │   ├── Sign-in/
+│   │   │   └── index.js        # Sign-in screen
+│   │   ├── Sign-up/
+│   │   │   └── index.js        # Sign-up screen
+│   │   └── _layout.tsx        # Authentication layout
+│   └── index.tsx            # Main entry point for app screens
+│
+├── assets/              # Static assets like fonts and images
+│   ├── fonts/              # Custom fonts
+│   │   ├── Outfit-Bold.ttf    
+│   │   ├── Outfit-Medium.ttf  
+│   │   └── Outfit-Regular.ttf 
+│   └── images/             # Image assets
+│       ├── adaptive-icon.png 
+│       ├── react-logo.png    
+│       └── other images...
+│
+├── components/          # Reusable React Native components
+│   ├── GetStarted.jsx       # Get Started component
+│   └── ProfileDropdown.jsx  # Dropdown menu for user profiles
+│
+├── constants/           # Constants and theme configuration
+│   └── Colors.ts           # Color palette for consistent styling
+│
+├── context/             # React context for state management
+│   ├── AuthContext.js       # Authentication context
+│   └── User.js              # User-related context
+│
+├── utils/               # Utility functions
+│   └── auth.js             # Utility functions for authentication
+│
+├── .expo/               # Expo configurations (generated automatically)
+├── .env                 # Environment variables configuration
+├── app.json             # Expo app configuration file
+├── babel.config.js      # Babel configuration
+├── package.json         # Project metadata and dependencies
+├── tsconfig.json        # TypeScript configuration
+├── README.md            # Project documentation
+
+```
+
+### FastAPI
+
+The FastAPI directory manages NLP-related tasks using Python. This section processes product reviews to generate insights and responses for user queries. It includes modules for handling NLP models, scraping APIs, and defining schemas and controllers.
+
+```plaintext
+fastapi/
+├── app/
+│   ├── Controllers/
+│   │   ├── __init__.py
+│   │   ├── routes.py
+│   ├── DB/
+│   │   ├── __init__.py
+│   │   ├── session.py
+│   ├── Helpers/
+│   │   ├── __init__.py
+│   │   ├── embeddingAndFormat.py
+│   │   ├── formatter.py
+│   │   ├── playwrightScrapper.py
+│   │   ├── RagHelper.py
+│   │   ├── scrapeAndStore.py
+│   │   ├── scraperAPI.py
+│   ├── Model/
+│   │   ├── __init__.py
+│   │   ├── APIModel.py
+│   │   ├── embeddingModel.py
+│   │   ├── LlamaModel.py
+│   │   ├── NLPModel.py       
+│   │   ├── SentimentAnalyzer.py
+│   ├── Schemas/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── Product.py
+│   ├── __init__.py
+│   ├── main.py
+├── .dockerignore
+├── .gitignore
+├── Dockerfile
+├── requirements.txt
+
+
+```
+
