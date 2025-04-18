@@ -1,5 +1,5 @@
 # ReviewBot Moblie App
-
+DEMO LINK : https://drive.google.com/file/d/1Jr69jLoA1gkRwEcODYNzz47b8KZWV6h8/view?usp=sharing
 ## Project Overview
 
 Sorting through thousands of customer reviews to make informed decisions can be overwhelming and time-consuming. Our project, ReviewBot, serves as a one-stop solution by leveraging AI-powered Natural Language Processing (NLP) to analyze, summarize, and understand product reviews. With a seamless frontend experience and a robust backend powered by FastAPI, Node.js, and advanced NLP models like Ollama llama 3.2, the app delivers concise and actionable insights. Users can quickly grasp the sentiment, key highlights, and common concerns from reviews, saving time and ensuring smarter decision-making.
